@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AuditCore — {{ run.gate }} Audit · {{ run.pin }}</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+{% set active_page = 'reports' %}
+{% include '_nav.html' %}
+
+<div class="main-wrap">
+
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <a href="/">Dashboard</a>
+      <span class="sep">›</span>
+      <span id="bc-pin">{{ run.pin }}</span>
+      <span class="sep">›</span>
+      <span id="bc-type" style="color:var(--text-muted);">{{ run.project_type }}</span>
+      <span class="sep">›</span>
+      <span class="current">{{ run.gate }} Audit Results</span>
+    </div>
+    <div class="topbar-right">
+      <div id="topbar-pill" class="topbar-pill">
+        <span class="pulse"></span> <span id="topbar-text">Agents running…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">{{ run.gate }} Gate Audit — RFP → Solution Proposal</div>
+        <div class="page-subtitle">
+          {{ run.project_name }} · {{ run.pin }}
+          {% if run.is_reaudit %}
+            <span class="badge blue" style="margin-left:8px;"><span class="dot blue"></span> Re-Audit linked to {{ run.parent_run_id }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="openReauditModal()" title="Creates a new linked run. Original results preserved.">🔁 Request Re-Audit</button>
+        <button class="btn btn-primary" onclick="openGateDecisionModal()">✍️ Record Gate Decision</button>
+      </div>
+    </div>
+
+    <!-- Context Banner -->
+    <div class="context-banner">
+      <div class="ctx-item"><label>Project</label><div class="ctx-value">{{ run.project_name }}</div></div>
+      <div class="ctx-item"><label>PIN</label><div class="ctx-value mono">{{ run.pin }}</div></div>
+      <div class="ctx-item"><label>Project Type</label><div class="ctx-value">{{ run.project_type }} <span style="color:rgba(255,255,255,.4);font-size:11px;">· {{ run.lifecycle }}</span></div></div>
+      <div class="ctx-item"><label>Gate</label>
+        <div class="ctx-value"><span style="background:rgba(255,255,255,.15);color:#fff;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700;">{{ run.gate }}</span> RFP → Solution Proposal</div>
+      </div>
+      <div class="ctx-item"><label>Checklist Version</label><div class="ctx-value mono">{{ run.policy_version }} <span style="color:rgba(255,255,255,.4);font-size:11px;">({{ run.policy_approved }})</span></div></div>
+      <div class="ctx-item"><label>Gate Status</label><div class="ctx-value" id="ctx-gate-status"><span class="badge inprog"><span class="dot amber"></span> In Progress</span></div></div>
+      <div class="ctx-item"><label>AI Model</label><div class="ctx-value small">{{ run.ai_model }}</div></div>
+      <div class="ctx-item"><label>Run ID</label><div class="ctx-value mono small">{{ run.run_id }}</div></div>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="summary-row">
+      <div class="summary-card"><div class="s-icon s-total-bg">📊</div><div><div class="s-num s-total" id="sum-total">—</div><div class="s-label">Total Controls</div></div></div>
+      <div class="summary-card"><div class="s-icon s-pass-bg">✅</div><div><div class="s-num s-pass" id="sum-pass">—</div><div class="s-label">Pass</div></div></div>
+      <div class="summary-card"><div class="s-icon s-fail-bg">❌</div><div><div class="s-num s-fail" id="sum-fail">—</div><div class="s-label">Fail</div></div></div>
+      <div class="summary-card"><div class="s-icon s-review-bg">👁</div><div><div class="s-num s-review" id="sum-review">—</div><div class="s-label">Needs Review</div></div></div>
+      <div class="summary-card"><div class="s-icon s-unable-bg">⚠️</div><div><div class="s-num s-unable" id="sum-unable">—</div><div class="s-label">Unable to Verify</div></div></div>
+      <div class="summary-card"><div class="s-icon s-pending-bg">🕐</div><div><div class="s-num s-pending" id="sum-pending">—</div><div class="s-label">Pending</div></div></div>
+      <div class="summary-card"><div class="s-icon s-waived-bg">🔖</div><div><div class="s-num s-waived" id="sum-waived">—</div><div class="s-label">Waived</div></div></div>
+      <div class="summary-card" title="Excluded for this project type — not a failure"><div class="s-icon" style="background:#f3f4f6;">🚫</div><div><div class="s-num" style="color:#6b7280;" id="sum-na">0</div><div class="s-label">Not Applicable</div></div></div>
+    </div>
+
+    <!-- Policy notice -->
+    <div class="policy-notice">
+      <span class="pn-icon">🤖</span>
+      <div>
+        <strong>Agents retrieved evidence automatically from SharePoint</strong> and evaluated it against each control's acceptance criteria defined in
+        <strong>Comviva Checklist {{ run.policy_version }}</strong>.
+        AI agents explain and propose findings — final gate status requires human approval. No SaaS AI assistants invoked. Evidence retrieved via standard API connectors only.
+      </div>
+    </div>
+
+    <!-- Override banner -->
+    <div class="override-banner" id="override-banner" style="display:none;">
+      <span style="font-size:18px;flex-shrink:0;">⚠️</span>
+      <div id="override-banner-text"></div>
+    </div>
+
+    <!-- TWO COLUMN -->
+    <div class="two-col">
+
+      <!-- LEFT: Results table -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <h2><div class="card-icon" style="background:#eff6ff;">📋</div> Checklist Evaluation Results</h2>
+            <div class="hdr-actions">
+              <button class="btn btn-secondary btn-sm" onclick="exportReport()">⬇ Export Report</button>
+              <button class="btn btn-ghost btn-sm" onclick="openReauditModal()">🔁 Re-Audit</button>
+            </div>
+          </div>
+
+          <!-- Filter bar -->
+          <div class="filter-bar">
+            <div class="search-wrap">
+              <span class="s-icon-inp">🔍</span>
+              <input type="search" id="search-input" placeholder="Search controls, criteria, evidence, rationale…" oninput="applyFilter()"/>
+            </div>
+            <span class="filter-pill active" data-filter="all"       onclick="setFilter('all',this)">All</span>
+            <span class="filter-pill"        data-filter="pass"      onclick="setFilter('pass',this)">Pass</span>
+            <span class="filter-pill"        data-filter="fail"      onclick="setFilter('fail',this)">Fail</span>
+            <span class="filter-pill"        data-filter="needs_review"     onclick="setFilter('needs_review',this)">Review</span>
+            <span class="filter-pill"        data-filter="unable_to_verify" onclick="setFilter('unable_to_verify',this)">Unable</span>
+            <span class="filter-pill"        data-filter="pending"   onclick="setFilter('pending',this)">Pending</span>
+            <span class="filter-pill"        data-filter="waived"    onclick="setFilter('waived',this)">Waived</span>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab('controls',this)">Controls &amp; Results</div>
+            <div class="tab" onclick="switchTab('evidence',this)">Evidence Log</div>
+            <div class="tab" onclick="switchTab('overrides',this)">Waivers &amp; Overrides</div>
+            <div class="tab" onclick="switchTab('history',this)">Audit Log</div>
+          </div>
+
+          <!-- Controls tab -->
+          <div id="tab-controls">
+            <div style="overflow-x:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:76px;">ID</th>
+                    <th>Requirement</th>
+                    <th>Acceptance Criteria<br/><span style="text-transform:none;font-weight:400;font-size:10px;color:var(--text-muted);">Customer-defined · agents check this</span></th>
+                    <th>Evidence Retrieved<br/><span style="text-transform:none;font-weight:400;font-size:10px;color:var(--text-muted);">Auto-collected from connectors</span></th>
+                    <th style="width:120px;">Verdict</th>
+                    <th style="width:80px;">Checked</th>
+                    <th style="width:110px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="controls-tbody">
+                  <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">
+                    <div class="spinner" style="margin:0 auto 12px;"></div>
+                    Agents retrieving evidence from SharePoint…
+                  </td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="run-footer">
+              <div class="rf-item">Run: <strong>{{ run.run_id }}</strong></div>
+              <div class="rf-item">Checklist: <strong>{{ run.policy_version }}</strong></div>
+              <div class="rf-item">Model: <strong>{{ run.ai_model }}</strong></div>
+              <div class="rf-item" id="rf-duration" style="margin-left:auto;"></div>
+            </div>
+          </div>
+
+          <!-- Evidence log tab -->
+          <div id="tab-evidence" style="display:none;">
+            <div style="padding:20px;" id="evidence-log-content">
+              <p style="color:var(--text-muted);font-size:13px;">Evidence log populates as agents retrieve from SharePoint…</p>
+            </div>
+          </div>
+
+          <!-- Waivers tab -->
+          <div id="tab-overrides" style="display:none;">
+            <div style="padding:20px;" id="overrides-content">
+              <p style="color:var(--text-muted);font-size:13px;">No waivers or confirmed failures recorded yet.</p>
+            </div>
+          </div>
+
+          <!-- Audit log tab -->
+          <div id="tab-history" style="display:none;">
+            <div style="padding:20px;" id="audit-log-content">
+              <p style="color:var(--text-muted);font-size:13px;">Audit log is empty.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Side panels -->
+      <div class="right-panel">
+
+        <!-- Agent Activity -->
+        <div class="card">
+          <div class="card-header">
+            <h2><div class="card-icon" style="background:#f5f3ff;">🤖</div> Agent Activity</h2>
+          </div>
+          <div class="agent-list" id="agent-list">
+            <div style="padding:20px;text-align:center;color:var(--text-muted);">
+              <div class="spinner" style="margin:0 auto 8px;"></div> Initialising…
+            </div>
+          </div>
+          <div class="run-footer">
+            <div class="rf-item" style="font-size:11px;">Agents retrieve evidence automatically — no manual uploads required</div>
+          </div>
+        </div>
+
+        <!-- Connector Status -->
+        <div class="card">
+          <div class="card-header">
+            <h2><div class="card-icon" style="background:#f0fdf4;">🔌</div> Evidence Sources</h2>
+            <span class="wf-note">Phase 1</span>
+          </div>
+          <div class="connector-row">
+            <div class="conn-left">
+              <div class="conn-ico">📁</div>
+              <div>
+                <div class="conn-name">SharePoint</div>
+                <div class="conn-count" id="conn-sp-count">Connecting…</div>
+              </div>
+            </div>
+            <div class="conn-status" id="conn-sp-status"><span class="dot amber"></span> Connecting</div>
+          </div>
+          <div class="connector-row" style="opacity:.5;">
+            <div class="conn-left"><div class="conn-ico">🗃</div>
+              <div><div class="conn-name">Dataverse <span class="phase2-tag">Phase 2</span></div><div class="conn-count">Not configured</div></div>
+            </div>
+            <div class="conn-status off"><span class="dot gray"></span> Phase 2</div>
+          </div>
+          <div class="connector-row" style="opacity:.5;">
+            <div class="conn-left"><div class="conn-ico">🎯</div>
+              <div><div class="conn-name">Jira <span class="phase2-tag">Phase 2</span></div><div class="conn-count">Not configured</div></div>
+            </div>
+            <div class="conn-status off"><span class="dot gray"></span> Phase 2</div>
+          </div>
+          <div class="connector-row" style="opacity:.5;">
+            <div class="conn-left"><div class="conn-ico">📚</div>
+              <div><div class="conn-name">Confluence <span class="phase2-tag">Phase 2</span></div><div class="conn-count">Not configured</div></div>
+            </div>
+            <div class="conn-status off"><span class="dot gray"></span> Phase 2</div>
+          </div>
+          <div class="run-footer">
+            <div class="rf-item">Phase 1: SharePoint only · Read-only · Least-privilege</div>
+          </div>
+        </div>
+
+        <!-- Pipeline -->
+        <div class="card">
+          <div class="card-header">
+            <h2><div class="card-icon" style="background:#eff6ff;">⚙️</div> Audit Pipeline</h2>
+            <span class="wf-note">Step Functions</span>
+          </div>
+          <div class="pipeline" id="pipeline"></div>
+        </div>
+
+        <!-- Report & Actions -->
+        <div class="card">
+          <div class="card-header">
+            <h2><div class="card-icon" style="background:#fff7ed;">📤</div> Report &amp; Actions</h2>
+          </div>
+          <div class="report-actions">
+            <div class="action-row" onclick="exportReport()">
+              <div class="ar-left"><div class="ar-ico" style="background:#eff6ff;">📄</div>
+                <div><div class="ar-title">Export Gate Report</div><div class="ar-sub">Evidence links, criteria, verdicts &amp; audit log</div></div>
+              </div><span class="ar-arrow">›</span>
+            </div>
+            <div class="action-row" onclick="openReauditModal()">
+              <div class="ar-left"><div class="ar-ico" style="background:#f5f3ff;">🔁</div>
+                <div><div class="ar-title">Request Re-Audit</div><div class="ar-sub">New linked run · agents re-collect evidence · original preserved</div></div>
+              </div><span class="ar-arrow">›</span>
+            </div>
+            <div class="action-row" onclick="openGateDecisionModal()">
+              <div class="ar-left"><div class="ar-ico" style="background:#fff1f2;">✍️</div>
+                <div><div class="ar-title">Record Gate Decision</div><div class="ar-sub">Approve / Reject — waivers require rationale &amp; expiry</div></div>
+              </div><span class="ar-arrow">›</span>
+            </div>
+          </div>
+          <div id="gate-decision-display" style="display:none;padding:14px 16px;border-top:1px solid var(--border);"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Waiver Modal -->
+<div class="modal-overlay" id="waiver-modal" style="display:none;" onclick="closeModalOnOverlay(event,'waiver-modal')">
+  <div class="modal">
+    <div class="modal-header"><h3>🔖 Record Waiver</h3><button class="modal-close" onclick="closeModal('waiver-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="modal-notice warn">A waiver is <strong>not a Pass</strong>. Requires rationale, authorised approver, and expiry date. Reported separately.</div>
+      <input type="hidden" id="waiver-ctrl-id"/>
+      <div class="form-group"><label>Control</label><div class="form-static" id="waiver-ctrl-label">—</div></div>
+      <div class="form-group"><label>Rationale <span class="required">*</span></label><textarea id="waiver-rationale" placeholder="Why this control cannot be met and why a waiver is justified…" rows="3"></textarea></div>
+      <div class="form-group"><label>Approver Name <span class="required">*</span></label><input type="text" id="waiver-approver" placeholder="Authorised Comviva approver"/></div>
+      <div class="form-group"><label>Expiry / Review Date <span class="required">*</span></label><input type="date" id="waiver-expiry"/></div>
+      <div id="waiver-error" class="form-error" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('waiver-modal')">Cancel</button>
+      <button class="btn btn-waiver" onclick="submitWaiver()">🔖 Record Waiver</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Fail Modal -->
+<div class="modal-overlay" id="fail-modal" style="display:none;" onclick="closeModalOnOverlay(event,'fail-modal')">
+  <div class="modal">
+    <div class="modal-header"><h3>❌ Confirm Fail</h3><button class="modal-close" onclick="closeModal('fail-modal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="fail-ctrl-id"/>
+      <div class="form-group"><label>Control</label><div class="form-static" id="fail-ctrl-label">—</div></div>
+      <div class="form-group"><label>Reviewer Note</label><textarea id="fail-reason" placeholder="Context for this failure decision…" rows="3"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('fail-modal')">Cancel</button>
+      <button class="btn btn-danger" onclick="submitFail()">❌ Confirm Fail</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Owner -->
+<div class="modal-overlay" id="assign-modal" style="display:none;" onclick="closeModalOnOverlay(event,'assign-modal')">
+  <div class="modal">
+    <div class="modal-header"><h3>👤 Assign Owner</h3><button class="modal-close" onclick="closeModal('assign-modal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="assign-ctrl-id"/>
+      <div class="form-group"><label>Control</label><div class="form-static" id="assign-ctrl-label">—</div></div>
+      <div class="form-group"><label>Owner Name</label><input type="text" id="assign-owner" placeholder="Comviva team member…"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('assign-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAssign()">Assign</button>
+    </div>
+  </div>
+</div>
+
+<!-- Re-Audit Modal -->
+<div class="modal-overlay" id="reaudit-modal" style="display:none;" onclick="closeModalOnOverlay(event,'reaudit-modal')">
+  <div class="modal modal-wide">
+    <div class="modal-header"><h3>🔁 Request Re-Audit</h3><button class="modal-close" onclick="closeModal('reaudit-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="modal-notice info">
+        A re-audit creates a <strong>new linked run</strong>. Agents automatically re-collect evidence for selected controls only.
+        Original results are preserved. Human-initiated only.
+      </div>
+      <div class="form-group"><label>Reason <span class="required">*</span></label>
+        <textarea id="reaudit-reason" placeholder="e.g. Approval signature added, evidence updated, finding challenged…" rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Select Controls to Re-Run <span class="required">*</span></label>
+        <div id="reaudit-controls-list" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:12px;"></div>
+      </div>
+      <div id="reaudit-error" class="form-error" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('reaudit-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitReaudit()">🔁 Start Re-Audit Run</button>
+    </div>
+  </div>
+</div>
+
+<!-- Gate Decision Modal -->
+<div class="modal-overlay" id="gate-modal" style="display:none;" onclick="closeModalOnOverlay(event,'gate-modal')">
+  <div class="modal">
+    <div class="modal-header"><h3>✍️ Record Gate Decision</h3><button class="modal-close" onclick="closeModal('gate-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="modal-notice info">Gate decision is recorded by an authorised Comviva reviewer. Agents cannot approve gate readiness.</div>
+      <div class="form-group"><label>Decision <span class="required">*</span></label>
+        <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">
+          <label class="radio-opt"><input type="radio" name="gate-dec" value="approve"/> <span class="radio-label approve-label">✅ Approve</span></label>
+          <label class="radio-opt"><input type="radio" name="gate-dec" value="reject"/>  <span class="radio-label reject-label">❌ Reject</span></label>
+          <label class="radio-opt"><input type="radio" name="gate-dec" value="defer"/>   <span class="radio-label defer-label">⏸ Defer</span></label>
+        </div>
+      </div>
+      <div class="form-group"><label>Reviewer Name <span class="required">*</span></label><input type="text" id="gate-reviewer" placeholder="Authorised reviewer…"/></div>
+      <div class="form-group"><label>Notes</label><textarea id="gate-notes" placeholder="Conditions, references or context…" rows="3"></textarea></div>
+      <div id="gate-error" class="form-error" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('gate-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitGateDecision()">✍️ Record Decision</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script>const RUN_ID = "{{ run_id }}";</script>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AuditCore — Checklist & Policy Setup</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+{% set active_page = 'setup' %}
+{% include '_nav.html' %}
+
+<div class="main-wrap">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <a href="/">Dashboard</a>
+      <span class="sep">›</span>
+      <span class="current">Checklist &amp; Policy Setup</span>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-pill phase1-pill"><span class="dot blue"></span> G1 · RFP → Proposal</div>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Checklist &amp; Compliance Policy Setup</div>
+        <div class="page-subtitle">Define what agents check, what constitutes a pass, and the governance policies that govern the gate. Agents retrieve evidence automatically — you define the criteria.</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="window.location.href='/'">← Back to Dashboard</button>
+        <button class="btn btn-primary" id="btn-save" onclick="saveChecklist()">💾 Save &amp; Version</button>
+      </div>
+    </div>
+
+    <!-- Flow explanation -->
+    <div class="flow-stepper">
+      <div class="flow-step done">
+        <div class="flow-step-num">1</div>
+        <div class="flow-step-label">Define Checklist<br/><span>You are here</span></div>
+      </div>
+      <div class="flow-step-arrow">→</div>
+      <div class="flow-step upcoming">
+        <div class="flow-step-num">2</div>
+        <div class="flow-step-label">Approve &amp; Version<br/><span>Lock for audits</span></div>
+      </div>
+      <div class="flow-step-arrow">→</div>
+      <div class="flow-step upcoming">
+        <div class="flow-step-num">3</div>
+        <div class="flow-step-label">Start Audit<br/><span>Agents auto-collect evidence</span></div>
+      </div>
+      <div class="flow-step-arrow">→</div>
+      <div class="flow-step upcoming">
+        <div class="flow-step-num">4</div>
+        <div class="flow-step-label">Review Results<br/><span>Pass / Fail / Waive</span></div>
+      </div>
+    </div>
+
+    <!-- Checklist info banner -->
+    <div class="policy-notice" style="margin-bottom:20px;">
+      <span class="pn-icon">ℹ️</span>
+      <div>
+        <strong>How this works:</strong> You define the controls (what to check) and acceptance criteria (what constitutes a pass).
+        When an audit runs, agents automatically connect to <strong>SharePoint</strong> (Phase 1) and retrieve the relevant documents.
+        They evaluate each control against your criteria and return Pass / Fail / Needs Review / Unable to Verify.
+        You never upload documents — agents pull from your connected systems.
+      </div>
+    </div>
+
+    <div class="two-col-setup">
+
+      <!-- LEFT: Controls -->
+      <div>
+
+        <!-- Checklist metadata -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header">
+            <h2><div class="card-icon" style="background:#eff6ff;">📋</div> Checklist Details</h2>
+            <div id="version-badge" class="badge blue">Version loading…</div>
+          </div>
+          <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="form-group" style="margin:0;">
+              <label>Checklist Name <span class="required">*</span></label>
+              <input type="text" id="cl-name" placeholder="e.g. G1 — RFP to Solution Proposal"/>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label>Gate</label>
+              <input type="text" id="cl-gate" value="G1" readonly style="background:#f7f9fc;"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls table -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header">
+            <h2><div class="card-icon" style="background:#f0fdf4;">✅</div> Controls <span id="control-count" class="badge na" style="margin-left:6px;">0</span></h2>
+            <button class="btn btn-primary btn-sm" onclick="openAddControlModal()">+ Add Control</button>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table id="controls-table">
+              <thead>
+                <tr>
+                  <th style="width:80px;">ID</th>
+                  <th>Requirement</th>
+                  <th>Acceptance Criteria<br/><span style="font-weight:400;text-transform:none;font-size:10px;color:var(--text-muted);">What agents check for</span></th>
+                  <th style="width:100px;">Severity</th>
+                  <th style="width:110px;">Check Type</th>
+                  <th style="width:110px;">Source</th>
+                  <th style="width:60px;"></th>
+                </tr>
+              </thead>
+              <tbody id="controls-tbody">
+                <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Loading controls…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Approval section -->
+        <div class="card" id="approval-card">
+          <div class="card-header">
+            <h2><div class="card-icon" style="background:#fef9c3;">✍️</div> Approve Checklist Version</h2>
+            <div id="approval-status-badge"></div>
+          </div>
+          <div style="padding:20px;">
+            <div class="policy-notice" style="margin-bottom:16px;">
+              <span class="pn-icon">⚠️</span>
+              <div>The checklist must be <strong>approved</strong> before it can be used in an audit.
+              Once approved, it is versioned and locked — any further edits create a new version requiring re-approval.
+              Approval is recorded with the approver name and timestamp.</div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+              <div class="form-group" style="margin:0;flex:1;min-width:200px;">
+                <label>Approver Name <span class="required">*</span></label>
+                <input type="text" id="approver-name" placeholder="Full name of authorised Comviva approver"/>
+              </div>
+              <button class="btn btn-primary" onclick="approveChecklist()" id="btn-approve">✅ Approve This Version</button>
+            </div>
+            <div id="approve-result" style="margin-top:12px;display:none;"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Policies -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <h2><div class="card-icon" style="background:#fef9c3;">⚖️</div> Compliance Policies</h2>
+            <button class="btn btn-ghost btn-sm" onclick="openAddPolicyModal()">+ Add Policy</button>
+          </div>
+          <div style="padding:4px 0;" id="policies-list">
+            <div style="padding:20px;text-align:center;color:var(--text-muted);">Loading policies…</div>
+          </div>
+          <div class="run-footer">
+            <div class="rf-item">Policies govern how the Compliance Evaluator scores results. They are not editable by agents.</div>
+          </div>
+        </div>
+
+        <!-- Connector info (read-only Phase 1) -->
+        <div class="card" style="margin-top:0;">
+          <div class="card-header">
+            <h2><div class="card-icon" style="background:#f0fdf4;">🔌</div> Evidence Sources (Auto)</h2>
+            <span class="wf-note">Agents connect automatically</span>
+          </div>
+          <div style="padding:14px 20px;font-size:12.5px;color:var(--text-muted);line-height:1.8;">
+            <div style="margin-bottom:10px;">Agents retrieve evidence automatically — you do not upload documents. Configure which systems are connected below.</div>
+            <div class="connector-info-row active-conn"><span>📁</span><div><strong>SharePoint</strong> — Active (Phase 1)<div style="font-size:11px;">Microsoft Graph · read-only · tenant-isolated</div></div><span class="badge pass" style="margin-left:auto;font-size:10px;">Active</span></div>
+            <div class="connector-info-row phase2-conn"><span>🗃</span><div><strong>Dataverse</strong> — Phase 2<div style="font-size:11px;">Project registry connector</div></div><span class="phase2-tag">Phase 2</span></div>
+            <div class="connector-info-row phase2-conn"><span>🎯</span><div><strong>Jira</strong> — Phase 2<div style="font-size:11px;">Work item traceability</div></div><span class="phase2-tag">Phase 2</span></div>
+            <div class="connector-info-row phase2-conn"><span>📚</span><div><strong>Confluence</strong> — Phase 2<div style="font-size:11px;">Architecture & decision records</div></div><span class="phase2-tag">Phase 2</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end two-col-setup -->
+
+    <!-- Bottom action bar -->
+    <div class="bottom-action-bar">
+      <div style="font-size:13px;color:var(--text-muted);">
+        Save and approve the checklist, then go to the Dashboard to start an audit.
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-secondary" onclick="saveChecklist()">💾 Save &amp; Version</button>
+        <button class="btn btn-primary" onclick="window.location.href='/'">Go to Dashboard →</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Add Control Modal -->
+<div class="modal-overlay" id="add-control-modal" style="display:none;" onclick="closeModalOnOverlay(event,'add-control-modal')">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h3>+ Add Control</h3>
+      <button class="modal-close" onclick="closeModal('add-control-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-notice info">
+        Define <strong>what</strong> the agent should check and <strong>what constitutes a pass</strong>.
+        The agent will automatically retrieve evidence from connected systems and evaluate it against your acceptance criteria.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-group">
+          <label>Control ID <span class="required">*</span></label>
+          <input type="text" id="new-ctrl-id" placeholder="e.g. G1-C13"/>
+        </div>
+        <div class="form-group">
+          <label>Severity <span class="required">*</span></label>
+          <select id="new-ctrl-severity">
+            <option value="mandatory">Mandatory</option>
+            <option value="advisory">Advisory</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Requirement <span class="required">*</span></label>
+        <input type="text" id="new-ctrl-req" placeholder="What must be true for this control to pass?"/>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" id="new-ctrl-desc" placeholder="Additional context for auditors"/>
+      </div>
+      <div class="form-group">
+        <label>Acceptance Criteria <span class="required">*</span> <span style="font-size:11px;color:var(--text-muted);font-weight:400;">— what agents evaluate evidence against</span></label>
+        <textarea id="new-ctrl-criteria" rows="3" placeholder="e.g. Document exists, approval_status = Approved, all mandatory fields populated, AI confidence ≥ 80%…"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-group">
+          <label>Check Type <span class="required">*</span></label>
+          <select id="new-ctrl-type">
+            <option value="deterministic">Deterministic — rules only, no AI</option>
+            <option value="ai-assisted">AI-Assisted — semantic check needed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Evidence Source (hint)</label>
+          <select id="new-ctrl-source">
+            <option value="SharePoint">SharePoint (Phase 1 — active)</option>
+            <option value="Dataverse">Dataverse (Phase 2)</option>
+            <option value="Jira">Jira (Phase 2)</option>
+            <option value="Confluence">Confluence (Phase 2)</option>
+          </select>
+        </div>
+      </div>
+      <div id="add-ctrl-error" class="form-error" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('add-control-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddControl()">+ Add Control</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Policy Modal -->
+<div class="modal-overlay" id="add-policy-modal" style="display:none;" onclick="closeModalOnOverlay(event,'add-policy-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>+ Add Compliance Policy</h3>
+      <button class="modal-close" onclick="closeModal('add-policy-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Policy ID</label>
+        <input type="text" id="new-pol-id" placeholder="e.g. POL-07"/>
+      </div>
+      <div class="form-group">
+        <label>Policy Name <span class="required">*</span></label>
+        <input type="text" id="new-pol-name" placeholder="Short descriptive name"/>
+      </div>
+      <div class="form-group">
+        <label>Rule <span class="required">*</span></label>
+        <textarea id="new-pol-rule" rows="3" placeholder="The governance rule the Compliance Evaluator enforces…"></textarea>
+      </div>
+      <div id="add-pol-error" class="form-error" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('add-policy-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddPolicy()">+ Add Policy</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Control Modal -->
+<div class="modal-overlay" id="edit-control-modal" style="display:none;" onclick="closeModalOnOverlay(event,'edit-control-modal')">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h3>✏️ Edit Control</h3>
+      <button class="modal-close" onclick="closeModal('edit-control-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-ctrl-orig-id"/>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-group"><label>Control ID</label><input type="text" id="edit-ctrl-id"/></div>
+        <div class="form-group"><label>Severity</label>
+          <select id="edit-ctrl-severity"><option value="mandatory">Mandatory</option><option value="advisory">Advisory</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>Requirement</label><input type="text" id="edit-ctrl-req"/></div>
+      <div class="form-group"><label>Description</label><input type="text" id="edit-ctrl-desc"/></div>
+      <div class="form-group">
+        <label>Acceptance Criteria <span style="font-size:11px;color:var(--text-muted);font-weight:400;">— what agents evaluate evidence against</span></label>
+        <textarea id="edit-ctrl-criteria" rows="3"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-group"><label>Check Type</label>
+          <select id="edit-ctrl-type"><option value="deterministic">Deterministic</option><option value="ai-assisted">AI-Assisted</option></select>
+        </div>
+        <div class="form-group"><label>Evidence Source</label>
+          <select id="edit-ctrl-source">
+            <option value="SharePoint">SharePoint</option>
+            <option value="Dataverse">Dataverse</option>
+            <option value="Jira">Jira</option>
+            <option value="Confluence">Confluence</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('edit-control-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitEditControl()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const CL_ID = "{{ checklist.checklist_id }}";
+let _cl = null;
+
+async function loadChecklist() {
+  const res = await fetch(`/api/checklist/${CL_ID}`);
+  _cl = await res.json();
+  renderChecklist();
+}
+
+function renderChecklist() {
+  if (!_cl) return;
+
+  document.getElementById('cl-name').value = _cl.name;
+  document.getElementById('cl-gate').value = _cl.gate;
+
+  // Version badge
+  const vb = document.getElementById('version-badge');
+  vb.textContent = _cl.version;
+  vb.className   = 'badge ' + (_cl.approved ? 'pass' : 'review');
+
+  // Approval status
+  const ab = document.getElementById('approval-status-badge');
+  if (_cl.approved) {
+    ab.innerHTML = `<span class="badge pass"><span class="dot green"></span> Approved by ${_cl.approved_by} · ${_cl.approved_at}</span>`;
+    document.getElementById('btn-approve').textContent = '✅ Already Approved';
+    document.getElementById('btn-approve').disabled = true;
+    document.getElementById('btn-approve').style.opacity = '0.6';
+  } else {
+    ab.innerHTML = `<span class="badge review"><span class="dot amber"></span> Pending approval</span>`;
+    document.getElementById('btn-approve').disabled = false;
+    document.getElementById('btn-approve').style.opacity = '1';
+    document.getElementById('btn-approve').textContent = '✅ Approve This Version';
+  }
+
+  // Controls count
+  document.getElementById('control-count').textContent = _cl.controls.length;
+
+  // Controls table
+  const tbody = document.getElementById('controls-tbody');
+  tbody.innerHTML = _cl.controls.map((c,i) => `
+    <tr>
+      <td><span class="ctrl-id">${c.id}</span></td>
+      <td>
+        <div class="ctrl-req">${c.requirement}</div>
+        <div class="ctrl-desc">${c.description || ''}</div>
+      </td>
+      <td>
+        <div style="font-size:12px;color:var(--text);line-height:1.6;">${c.acceptance_criteria}</div>
+      </td>
+      <td><span class="ctrl-tag ${c.severity}">${c.severity.toUpperCase()}</span></td>
+      <td><span class="ctrl-tag ${c.check_type === 'ai-assisted' ? 'ai' : ''}" style="${c.check_type==='deterministic'?'background:#f0fdf4;color:#166534;':''}">${c.check_type === 'ai-assisted' ? 'AI-Assisted' : 'Deterministic'}</span></td>
+      <td><span style="font-size:11px;color:var(--text-muted);">${c.source_hint || 'SharePoint'}</span></td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-ghost btn-sm" title="Edit" onclick="openEditControl(${i})">✏️</button>
+          <button class="btn btn-ghost btn-sm" title="Delete" onclick="deleteControl('${c.id}')" style="color:var(--fail);">🗑</button>
+        </div>
+      </td>
+    </tr>`).join('');
+
+  // Policies
+  const pl = document.getElementById('policies-list');
+  pl.innerHTML = (_cl.policies || []).map((p,i) => `
+    <div class="policy-row">
+      <div class="policy-row-left">
+        <span class="ctrl-id" style="font-size:10px;">${p.id}</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);">${p.name}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${p.rule}</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="color:var(--fail);flex-shrink:0;" onclick="deletePolicy(${i})">🗑</button>
+    </div>`).join('') || '<div style="padding:16px 20px;color:var(--text-muted);font-size:13px;">No policies defined.</div>';
+}
+
+async function saveChecklist() {
+  const name = document.getElementById('cl-name').value.trim();
+  if (!name) { showToast('❌ Checklist name is required'); return; }
+  if (!_cl || !_cl.controls.length) { showToast('❌ At least one control is required'); return; }
+
+  const body = {
+    checklist_id: CL_ID,
+    gate: 'G1',
+    name,
+    controls: _cl.controls,
+    policies: _cl.policies || [],
+  };
+  const res  = await fetch('/api/checklist', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const data = await res.json();
+  if (data.ok) {
+    showToast(`💾 Saved — ${data.version}`);
+    await loadChecklist();
+  } else {
+    showToast('❌ ' + (data.error || 'Save failed'));
+  }
+}
+
+async function approveChecklist() {
+  const approver = document.getElementById('approver-name').value.trim();
+  if (!approver) { showToast('❌ Approver name required'); return; }
+
+  // Save first
+  await saveChecklist();
+
+  const res  = await fetch(`/api/checklist/${CL_ID}/approve`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({approver}) });
+  const data = await res.json();
+  if (data.ok) {
+    const el = document.getElementById('approve-result');
+    el.style.display = 'block';
+    el.innerHTML = `<div class="modal-notice" style="background:#dcfce7;border-color:#86efac;color:#166534;margin:0;">
+      ✅ <strong>Approved</strong> — Version ${data.version} approved by ${approver} at ${data.approved_at}.
+      This checklist is now ready for use in audits.
+      <div style="margin-top:8px;"><a href="/" class="btn btn-primary btn-sm">Go to Dashboard → Start Audit</a></div>
+    </div>`;
+    await loadChecklist();
+    showToast('✅ Checklist approved and ready for audits');
+  } else {
+    showToast('❌ ' + (data.error || 'Approval failed'));
+  }
+}
+
+// Add control
+function openAddControlModal() {
+  ['new-ctrl-id','new-ctrl-req','new-ctrl-desc','new-ctrl-criteria'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('new-ctrl-severity').value = 'mandatory';
+  document.getElementById('new-ctrl-type').value     = 'deterministic';
+  document.getElementById('new-ctrl-source').value   = 'SharePoint';
+  document.getElementById('add-ctrl-error').style.display = 'none';
+  openModal('add-control-modal');
+}
+
+function submitAddControl() {
+  const id       = document.getElementById('new-ctrl-id').value.trim();
+  const req      = document.getElementById('new-ctrl-req').value.trim();
+  const criteria = document.getElementById('new-ctrl-criteria').value.trim();
+  const severity = document.getElementById('new-ctrl-severity').value;
+  const type     = document.getElementById('new-ctrl-type').value;
+  const source   = document.getElementById('new-ctrl-source').value;
+  const desc     = document.getElementById('new-ctrl-desc').value.trim();
+  const errEl    = document.getElementById('add-ctrl-error');
+
+  if (!id || !req || !criteria) {
+    errEl.textContent = 'Control ID, Requirement and Acceptance Criteria are required.';
+    errEl.style.display = 'block'; return;
+  }
+  if (_cl.controls.find(c => c.id === id)) {
+    errEl.textContent = `Control ID "${id}" already exists.`;
+    errEl.style.display = 'block'; return;
+  }
+  _cl.controls.push({ id, requirement:req, description:desc, acceptance_criteria:criteria, severity, check_type:type, source_hint:source });
+  _cl.approved = false;
+  renderChecklist();
+  closeModal('add-control-modal');
+  showToast(`✅ Control ${id} added`);
+}
+
+// Edit control
+function openEditControl(idx) {
+  const c = _cl.controls[idx];
+  document.getElementById('edit-ctrl-orig-id').value  = c.id;
+  document.getElementById('edit-ctrl-id').value       = c.id;
+  document.getElementById('edit-ctrl-req').value      = c.requirement;
+  document.getElementById('edit-ctrl-desc').value     = c.description || '';
+  document.getElementById('edit-ctrl-criteria').value = c.acceptance_criteria;
+  document.getElementById('edit-ctrl-severity').value = c.severity;
+  document.getElementById('edit-ctrl-type').value     = c.check_type;
+  document.getElementById('edit-ctrl-source').value   = c.source_hint || 'SharePoint';
+  openModal('edit-control-modal');
+}
+
+function submitEditControl() {
+  const origId   = document.getElementById('edit-ctrl-orig-id').value;
+  const idx      = _cl.controls.findIndex(c => c.id === origId);
+  if (idx === -1) return;
+  _cl.controls[idx] = {
+    id:                  document.getElementById('edit-ctrl-id').value.trim(),
+    requirement:         document.getElementById('edit-ctrl-req').value.trim(),
+    description:         document.getElementById('edit-ctrl-desc').value.trim(),
+    acceptance_criteria: document.getElementById('edit-ctrl-criteria').value.trim(),
+    severity:            document.getElementById('edit-ctrl-severity').value,
+    check_type:          document.getElementById('edit-ctrl-type').value,
+    source_hint:         document.getElementById('edit-ctrl-source').value,
+  };
+  _cl.approved = false;
+  renderChecklist();
+  closeModal('edit-control-modal');
+  showToast('✅ Control updated');
+}
+
+function deleteControl(ctrlId) {
+  if (!confirm(`Delete control ${ctrlId}? This cannot be undone.`)) return;
+  _cl.controls = _cl.controls.filter(c => c.id !== ctrlId);
+  _cl.approved = false;
+  renderChecklist();
+  showToast(`🗑 Control ${ctrlId} removed`);
+}
+
+// Policy
+function openAddPolicyModal() {
+  ['new-pol-id','new-pol-name','new-pol-rule'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('add-pol-error').style.display = 'none';
+  openModal('add-policy-modal');
+}
+
+function submitAddPolicy() {
+  const name = document.getElementById('new-pol-name').value.trim();
+  const rule = document.getElementById('new-pol-rule').value.trim();
+  const id   = document.getElementById('new-pol-id').value.trim() || 'POL-' + String((_cl.policies||[]).length+1).padStart(2,'0');
+  if (!name||!rule) { document.getElementById('add-pol-error').textContent='Name and Rule required.'; document.getElementById('add-pol-error').style.display='block'; return; }
+  if (!_cl.policies) _cl.policies = [];
+  _cl.policies.push({id, name, rule});
+  _cl.approved = false;
+  renderChecklist();
+  closeModal('add-policy-modal');
+  showToast('✅ Policy added');
+}
+
+function deletePolicy(idx) {
+  _cl.policies.splice(idx,1);
+  _cl.approved = false;
+  renderChecklist();
+  showToast('🗑 Policy removed');
+}
+
+function openModal(id)  { document.getElementById(id).style.display='flex'; }
+function closeModal(id) { document.getElementById(id).style.display='none'; }
+function closeModalOnOverlay(e,id) { if(e.target===document.getElementById(id)) closeModal(id); }
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block'; t.classList.add('toast-show');
+  setTimeout(()=>{ t.classList.remove('toast-show'); setTimeout(()=>t.style.display='none',300); },3000);
+}
+
+loadChecklist();
+</script>
+</body>
+</html>

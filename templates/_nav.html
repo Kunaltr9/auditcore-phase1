@@ -1,0 +1,50 @@
+{# Shared sidebar — include with: {% set active_page = 'dashboard' %} {% include '_nav.html' %} #}
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L4 5.5V11c0 4.97 3.4 9.63 8 10.93C16.6 20.63 20 15.97 20 11V5.5L12 2z"/></svg>
+    </div>
+    <div><div class="brand-text">AuditCore<span>Comviva · Phase 1 Pilot</span></div></div>
+  </div>
+
+  <div class="sidebar-section-label">Main</div>
+
+  <a class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" href="/">
+    <span class="nav-icon">🏠</span> Dashboard
+  </a>
+
+  <a class="nav-item {% if active_page == 'setup' %}active{% endif %}" href="/setup">
+    <span class="nav-icon">📋</span> Checklist Setup
+  </a>
+
+  <a class="nav-item {% if active_page == 'projects' %}active{% endif %}" href="/projects">
+    <span class="nav-icon">📁</span> Projects
+  </a>
+
+  <div class="sidebar-section-label">Audit</div>
+
+  <a class="nav-item {% if active_page == 'reports' %}active{% endif %}" href="/reports">
+    <span class="nav-icon">🔍</span> Audit Results
+    {% if run_count is defined and run_count > 0 %}
+    <span class="nav-badge">{{ run_count }}</span>
+    {% endif %}
+  </a>
+
+  <a class="nav-item {% if active_page == 'connectors' %}active{% endif %}" href="/connectors">
+    <span class="nav-icon">🔌</span> Connectors
+  </a>
+
+  <div class="sidebar-section-label">Admin</div>
+
+  <a class="nav-item {% if active_page == 'settings' %}active{% endif %}" href="/settings">
+    <span class="nav-icon">⚙️</span> Settings
+  </a>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-avatar">QA</div>
+    <div>
+      <div class="sidebar-user-name">QA Reviewer</div>
+      <div class="sidebar-user-role">Comviva · Reviewer</div>
+    </div>
+  </div>
+</aside>
