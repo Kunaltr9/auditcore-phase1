@@ -3,33 +3,117 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AuditCore — {{ run.gate }} Audit · {{ run.pin }}</title>
+  <title>AuditCore — {{ run.gate }} · {{ run.pin }}</title>
   <link rel="stylesheet" href="/static/style.css"/>
 </head>
 <body>
 
+<!-- ══════ GLOBAL TOPNAV (Jira 2025) ══════ -->
+<nav class="topbar">
+  <!-- Left: app switcher + logo -->
+  <div class="topbar-appsw" title="App switcher">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+      <rect x="1" y="1" width="5" height="5" rx="1"/><rect x="7" y="1" width="5" height="5" rx="1"/>
+      <rect x="13" y="1" width="4" height="5" rx="1"/><rect x="1" y="7" width="5" height="5" rx="1"/>
+      <rect x="7" y="7" width="5" height="5" rx="1"/><rect x="13" y="7" width="4" height="5" rx="1"/>
+      <rect x="1" y="13" width="5" height="4" rx="1"/><rect x="7" y="13" width="5" height="4" rx="1"/>
+      <rect x="13" y="13" width="4" height="4" rx="1"/>
+    </svg>
+  </div>
+  <a class="topbar-logo" href="/">
+    <div class="topbar-logo-icon">
+      <svg viewBox="0 0 24 24" fill="white" width="14" height="14">
+        <path d="M12 2L4 5.5V11c0 4.97 3.4 9.63 8 10.93C16.6 20.63 20 15.97 20 11V5.5L12 2z"/>
+      </svg>
+    </div>
+    <span class="topbar-logo-name">AuditCore</span>
+  </a>
+
+  <!-- Middle: search -->
+  <div class="topbar-search">
+    <span class="topbar-search-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+        <path d="M9.5 8.5L13 12M6 10A4 4 0 106 2a4 4 0 000 8z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <input type="text" placeholder="Search AuditCore" readonly/>
+  </div>
+
+  <!-- Right: actions -->
+  <div class="topbar-right">
+    <button class="btn-create" onclick="startNewAudit()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6.75 1.25H5.25v4H1.25v1.5h4v4h1.5v-4h4v-1.5h-4v-4z"/></svg>
+      Create
+    </button>
+    <div id="run-status-pill" class="status-pill running">
+      <span class="pulse"></span>
+      <span id="run-status-text">Running</span>
+    </div>
+    <button class="topbar-icon-btn" title="Notifications">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 1a5 5 0 00-5 5v2.5L1.5 10H14.5L13 8.5V6a5 5 0 00-5-5zm0 14a2 2 0 002-2H6a2 2 0 002 2z"/>
+      </svg>
+    </button>
+    <button class="topbar-icon-btn" title="Help">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 11.5a1 1 0 110-2 1 1 0 010 2zm.75-4.5h-1.5C7.25 6.5 5 6.5 5 4.5 5 3.1 6.35 2 8 2s3 1.1 3 2.5c0 1.65-2.25 3.5-2.25 3.5z"/>
+      </svg>
+    </button>
+    <button class="topbar-icon-btn" title="Settings">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 5a3 3 0 100 6 3 3 0 000-6zm5.94 1.5l-.9-.52a5.07 5.07 0 000-1l.9-.52a1 1 0 00.5-1.21l-.5-1a1 1 0 00-1.21-.5l-.9.52a5.09 5.09 0 00-.87-.5V1a1 1 0 00-1-1H7a1 1 0 00-1 1v1.26a5.09 5.09 0 00-.87.5l-.9-.52a1 1 0 00-1.21.5l-.5 1a1 1 0 00.5 1.21l.9.52a5.07 5.07 0 000 1l-.9.52a1 1 0 00-.5 1.21l.5 1a1 1 0 001.21.5l.9-.52c.28.19.57.36.87.5V15a1 1 0 001 1h2a1 1 0 001-1v-1.26c.3-.14.59-.31.87-.5l.9.52a1 1 0 001.21-.5l.5-1a1 1 0 00-.5-1.21z"/>
+      </svg>
+    </button>
+    <div class="topbar-avatar" title="QA Reviewer">QA</div>
+  </div>
+</nav>
+
+<!-- ══════ SIDEBAR ══════ -->
 {% set active_page = 'reports' %}
 {% include '_nav.html' %}
 
+<!-- ══════ MAIN ══════ -->
 <div class="main-wrap">
 
-  <header class="topbar">
-    <div class="topbar-breadcrumb">
-      <a href="/">Dashboard</a>
-      <span class="sep">›</span>
-      <span id="bc-pin">{{ run.pin }}</span>
-      <span class="sep">›</span>
-      <span id="bc-type" style="color:var(--text-muted);">{{ run.project_type }}</span>
-      <span class="sep">›</span>
-      <span class="current">{{ run.gate }} Audit Results</span>
-    </div>
-    <div class="topbar-right">
-      <div id="topbar-pill" class="topbar-pill default">
-        <span class="pulse"></span> <span id="topbar-text">Agents running…</span>
+  <!-- Project header with horizontal tabs (Jira 2025 style) -->
+  <div class="project-header">
+    <div class="project-title-row">
+      <div class="project-tile" style="background:var(--blue-bold);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2L4 5.5V11c0 4.97 3.4 9.63 8 10.93C16.6 20.63 20 15.97 20 11V5.5L12 2z"/></svg>
       </div>
+      <span class="project-name">{{ run.project_name }}</span>
+      <span style="color:var(--n400);font-size:14px;">·</span>
+      <code style="font-size:12px;color:var(--n500);background:var(--n10);padding:2px 8px;border-radius:var(--r);border:1px solid var(--n40);">{{ run.pin }}</code>
+      {% if run.is_reaudit %}
+      <span class="lz lz-inprogress" style="margin-left:4px;">Re-Audit</span>
+      {% endif %}
     </div>
-  </header>
+    <!-- Horizontal project tabs -->
+    <div class="project-tabs">
+      <a class="project-tab" href="/">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" transform="scale(0.7) translate(2,2)"/></svg>
+        Summary
+      </a>
+      <a class="project-tab active" href="#">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M14 2H2a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1V3a1 1 0 00-1-1zm-1 10H3V4h10v8z"/></svg>
+        {{ run.gate }} Audit
+      </a>
+      <a class="project-tab" href="/reports">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M11 2H5L2 5v9a1 1 0 001 1h10a1 1 0 001-1V5l-3-3zM8 13a3 3 0 110-6 3 3 0 010 6z"/></svg>
+        All Runs
+      </a>
+      <a class="project-tab" href="/setup">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M13 1H3a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V2a1 1 0 00-1-1zm-2 10H5v-1h6v1zm0-3H5V7h6v1zm0-3H5V4h6v1z"/></svg>
+        Checklist
+      </a>
+      <a class="project-tab" href="/connectors">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 7h-3v2h3V7zm10 0h-3v2h3V7zm-5-4V1H6.5v2H4v2h1.5v2h5V5H12V3h-2.5z"/></svg>
+        Connectors
+      </a>
+    </div>
+  </div>
 
+  <!-- Page content -->
   <main class="page">
 
     <!-- Page header -->
@@ -37,90 +121,121 @@
       <div>
         <div class="page-title">{{ run.gate }} Gate Audit — RFP → Solution Proposal</div>
         <div class="page-subtitle">
-          {{ run.project_name }} · {{ run.pin }}
+          Run&nbsp;<code style="font-size:11px;background:var(--n10);padding:1px 6px;border-radius:var(--r);border:1px solid var(--n40);">{{ run.run_id }}</code>
+          &nbsp;·&nbsp;Checklist {{ run.policy_version }} (approved {{ run.policy_approved }})
+          &nbsp;·&nbsp;{{ run.ai_model }}
           {% if run.is_reaudit %}
-            <span class="badge blue" style="margin-left:8px;"><span class="dot blue"></span> Re-Audit linked to {{ run.parent_run_id }}</span>
+          &nbsp;·&nbsp;<a href="/audit/{{ run.parent_run_id }}" style="font-size:12px;">← Parent run</a>
           {% endif %}
         </div>
       </div>
       <div class="page-actions">
-        <button class="btn btn-secondary" onclick="openReauditModal()" title="Creates a new linked run. Original results preserved.">🔁 Request Re-Audit</button>
-        <button class="btn btn-primary" onclick="openGateDecisionModal()">✍️ Record Gate Decision</button>
+        <button class="btn btn-secondary btn-sm" onclick="openReauditModal()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M10 6A4 4 0 112 6H0l3-3 3 3H4a2 2 0 104 2V6h2z"/></svg>
+          Request Re-Audit
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="openGateDecisionModal()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M10 2L4.5 7.5 2 5 1 6l3.5 3.5 6.5-6.5L10 2z"/></svg>
+          Record Gate Decision
+        </button>
       </div>
     </div>
 
-    <!-- Context Banner — Jira project header style -->
+    <!-- Context strip -->
     <div class="context-banner">
-      <div class="ctx-item"><label>Project</label><div class="ctx-value">{{ run.project_name }}</div></div>
-      <div class="ctx-item"><label>PIN</label><div class="ctx-value mono">{{ run.pin }}</div></div>
-      <div class="ctx-item"><label>Project Type</label><div class="ctx-value">{{ run.project_type }} <span style="color:var(--ds-text-subtlest);font-size:11px;">· {{ run.lifecycle }}</span></div></div>
-      <div class="ctx-item"><label>Gate</label>
+      <div class="ctx-item">
+        <label>Project Type</label>
+        <div class="ctx-value">{{ run.project_type }} <span style="color:var(--n400);font-size:11px;">· {{ run.lifecycle }}</span></div>
+      </div>
+      <div class="ctx-item">
+        <label>Gate</label>
         <div class="ctx-value" style="display:flex;align-items:center;gap:6px;">
           <span class="gate-badge gate-active">{{ run.gate }}</span>
-          <span style="font-size:12px;color:var(--ds-text-subtle);">RFP → Solution Proposal</span>
+          <span style="font-size:12px;color:var(--n500);">RFP → Solution Proposal</span>
         </div>
       </div>
-      <div class="ctx-item"><label>Checklist Version</label><div class="ctx-value mono">{{ run.policy_version }} <span style="color:var(--ds-text-subtlest);font-size:11px;">({{ run.policy_approved }})</span></div></div>
-      <div class="ctx-item"><label>Gate Status</label><div class="ctx-value" id="ctx-gate-status"><span class="badge inprog"><span class="dot amber"></span> In Progress</span></div></div>
-      <div class="ctx-item"><label>AI Model</label><div class="ctx-value small">{{ run.ai_model }}</div></div>
-      <div class="ctx-item"><label>Run ID</label><div class="ctx-value mono small">{{ run.run_id }}</div></div>
+      <div class="ctx-item">
+        <label>Gate Status</label>
+        <div class="ctx-value" id="ctx-gate-status"><span class="lz lz-inprogress">In Progress</span></div>
+      </div>
+      <div class="ctx-item">
+        <label>Delivery Owner</label>
+        <div class="ctx-value">{{ run.project_name.split(' ')[0] }} Team</div>
+      </div>
+      <div class="ctx-item">
+        <label>Prompt Version</label>
+        <div class="ctx-value mono">{{ run.prompt_version }}</div>
+      </div>
+      <div class="ctx-item">
+        <label>Started</label>
+        <div class="ctx-value small" id="ctx-started">{{ run.started_at }}</div>
+      </div>
     </div>
 
-    <!-- Summary metric cards — Jira font.metric style -->
+    <!-- Metric cards -->
     <div class="summary-row">
-      <div class="summary-card"><div class="s-label">Total Controls</div><div class="s-num s-total" id="sum-total">—</div></div>
+      <div class="summary-card"><div class="s-label">Total</div><div class="s-num s-total" id="sum-total">—</div></div>
       <div class="summary-card"><div class="s-label">Pass</div><div class="s-num s-pass" id="sum-pass">—</div></div>
       <div class="summary-card"><div class="s-label">Fail</div><div class="s-num s-fail" id="sum-fail">—</div></div>
       <div class="summary-card"><div class="s-label">Needs Review</div><div class="s-num s-review" id="sum-review">—</div></div>
       <div class="summary-card"><div class="s-label">Unable to Verify</div><div class="s-num s-unable" id="sum-unable">—</div></div>
       <div class="summary-card"><div class="s-label">Pending</div><div class="s-num s-pending" id="sum-pending">—</div></div>
       <div class="summary-card"><div class="s-label">Waived</div><div class="s-num s-waived" id="sum-waived">—</div></div>
-      <div class="summary-card" title="Excluded for this project type — not a failure"><div class="s-label">Not Applicable</div><div class="s-num" style="color:var(--ds-text-subtlest);" id="sum-na">0</div></div>
+      <div class="summary-card" title="Excluded for this project type — not a failure"><div class="s-label">N/A</div><div class="s-num" style="color:var(--n400);" id="sum-na">0</div></div>
     </div>
 
-    <!-- Policy notice -->
-    <div class="policy-notice">
-      <span class="pn-icon">🤖</span>
-      <div>
-        <strong>Agents retrieved evidence automatically from SharePoint</strong> and evaluated it against each control's acceptance criteria defined in
+    <!-- Info banner -->
+    <div class="info-banner info">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--blue-bold)" style="flex-shrink:0;margin-top:2px;"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 10.5h-1.5v-5h1.5v5zm0-6.5h-1.5V3.5h1.5V5z"/></svg>
+      <div style="font-size:13px;">
+        <strong>Agents retrieved evidence from SharePoint automatically</strong> and evaluated each control against
         <strong>Comviva Checklist {{ run.policy_version }}</strong>.
-        AI agents explain and propose findings — final gate status requires human approval. No SaaS AI assistants invoked. Evidence retrieved via standard API connectors only.
+        AI agents explain and propose findings — final gate status requires human approval.
+        Failed controls show full failure detail and resolution guidance below.
       </div>
     </div>
 
     <!-- Override banner -->
     <div class="override-banner" id="override-banner" style="display:none;">
-      <span style="font-size:18px;flex-shrink:0;">⚠️</span>
-      <div id="override-banner-text"></div>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--yellow-bold)" style="flex-shrink:0;margin-top:2px;"><path d="M8 1L0 15h16L8 1zm-.75 5h1.5v4h-1.5V6zm.75 6.5a1 1 0 110-2 1 1 0 010 2z"/></svg>
+      <div id="override-banner-text" style="font-size:13px;"></div>
     </div>
 
-    <!-- TWO COLUMN -->
+    <!-- Main two-column -->
     <div class="two-col">
 
-      <!-- LEFT: Results table -->
+      <!-- ═══ LEFT: checklist results ═══ -->
       <div>
         <div class="card">
           <div class="card-header">
-            <h2><div class="card-icon" style="background:#eff6ff;">📋</div> Checklist Evaluation Results</h2>
+            <h2>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="color:var(--blue-bold)"><path d="M13 1H3a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V2a1 1 0 00-1-1zm-2 9H5v-1h6v1zm0-3H5V6h6v1zm0-3H5V3h6v1z"/></svg>
+              Checklist Evaluation — {{ run.gate }}: RFP → Solution Proposal
+            </h2>
             <div class="hdr-actions">
-              <button class="btn btn-secondary btn-sm" onclick="exportReport()">⬇ Export Report</button>
-              <button class="btn btn-ghost btn-sm" onclick="openReauditModal()">🔁 Re-Audit</button>
+              <button class="btn btn-secondary btn-sm" onclick="exportReport()">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h3V0h2v4h3L6 8zm-5 2h10v2H1v-2z"/></svg>
+                Export
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="openReauditModal()">Re-Audit</button>
             </div>
           </div>
 
           <!-- Filter bar -->
           <div class="filter-bar">
             <div class="search-wrap">
-              <span class="s-icon-inp">🔍</span>
-              <input type="search" id="search-input" placeholder="Search controls, criteria, evidence, rationale…" oninput="applyFilter()"/>
+              <span class="s-icon-inp">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M8 7L11 10M5 8A3 3 0 105 2a3 3 0 000 6z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
+              </span>
+              <input type="search" id="search-input" placeholder="Search controls, criteria, evidence…" oninput="applyFilter()"/>
             </div>
-            <span class="filter-pill active" data-filter="all"       onclick="setFilter('all',this)">All</span>
-            <span class="filter-pill"        data-filter="pass"      onclick="setFilter('pass',this)">Pass</span>
-            <span class="filter-pill"        data-filter="fail"      onclick="setFilter('fail',this)">Fail</span>
-            <span class="filter-pill"        data-filter="needs_review"     onclick="setFilter('needs_review',this)">Review</span>
+            <span class="filter-pill active" data-filter="all"             onclick="setFilter('all',this)">All</span>
+            <span class="filter-pill"        data-filter="pass"            onclick="setFilter('pass',this)">Pass</span>
+            <span class="filter-pill"        data-filter="fail"            onclick="setFilter('fail',this)">Fail</span>
+            <span class="filter-pill"        data-filter="needs_review"    onclick="setFilter('needs_review',this)">Review</span>
             <span class="filter-pill"        data-filter="unable_to_verify" onclick="setFilter('unable_to_verify',this)">Unable</span>
-            <span class="filter-pill"        data-filter="pending"   onclick="setFilter('pending',this)">Pending</span>
-            <span class="filter-pill"        data-filter="waived"    onclick="setFilter('waived',this)">Waived</span>
+            <span class="filter-pill"        data-filter="pending"         onclick="setFilter('pending',this)">Pending</span>
+            <span class="filter-pill"        data-filter="waived"          onclick="setFilter('waived',this)">Waived</span>
           </div>
 
           <!-- Tabs -->
@@ -139,15 +254,15 @@
                   <tr>
                     <th style="width:76px;">ID</th>
                     <th>Requirement</th>
-                    <th>Acceptance Criteria<br/><span style="text-transform:none;font-weight:400;font-size:10px;color:var(--text-muted);">Customer-defined · agents check this</span></th>
-                    <th>Evidence Retrieved<br/><span style="text-transform:none;font-weight:400;font-size:10px;color:var(--text-muted);">Auto-collected from connectors</span></th>
+                    <th>Acceptance Criteria</th>
+                    <th>Evidence Retrieved</th>
                     <th style="width:120px;">Verdict</th>
-                    <th style="width:80px;">Checked</th>
-                    <th style="width:110px;">Actions</th>
+                    <th style="width:62px;">Time</th>
+                    <th style="width:100px;"></th>
                   </tr>
                 </thead>
                 <tbody id="controls-tbody">
-                  <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">
+                  <tr><td colspan="7" style="text-align:center;padding:48px;color:var(--n400);">
                     <div class="spinner" style="margin:0 auto 12px;"></div>
                     Agents retrieving evidence from SharePoint…
                   </td></tr>
@@ -155,63 +270,72 @@
               </table>
             </div>
             <div class="run-footer">
-              <div class="rf-item">Run: <strong>{{ run.run_id }}</strong></div>
+              <div class="rf-item">Run: <strong id="rf-run-id">{{ run.run_id }}</strong></div>
               <div class="rf-item">Checklist: <strong>{{ run.policy_version }}</strong></div>
               <div class="rf-item">Model: <strong>{{ run.ai_model }}</strong></div>
               <div class="rf-item" id="rf-duration" style="margin-left:auto;"></div>
             </div>
           </div>
 
-          <!-- Evidence log tab -->
+          <!-- Evidence tab -->
           <div id="tab-evidence" style="display:none;">
             <div style="padding:20px;" id="evidence-log-content">
-              <p style="color:var(--text-muted);font-size:13px;">Evidence log populates as agents retrieve from SharePoint…</p>
+              <p style="color:var(--n400);font-size:13px;">Evidence log populates as agents retrieve from SharePoint…</p>
             </div>
           </div>
 
           <!-- Waivers tab -->
           <div id="tab-overrides" style="display:none;">
             <div style="padding:20px;" id="overrides-content">
-              <p style="color:var(--text-muted);font-size:13px;">No waivers or confirmed failures recorded yet.</p>
+              <p style="color:var(--n400);font-size:13px;">No waivers or confirmed failures yet.</p>
             </div>
           </div>
 
           <!-- Audit log tab -->
           <div id="tab-history" style="display:none;">
             <div style="padding:20px;" id="audit-log-content">
-              <p style="color:var(--text-muted);font-size:13px;">Audit log is empty.</p>
+              <p style="color:var(--n400);font-size:13px;">Audit log is empty.</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT: Side panels -->
+      <!-- ═══ RIGHT: panels ═══ -->
       <div class="right-panel">
 
         <!-- Agent Activity -->
         <div class="card">
           <div class="card-header">
-            <h2><div class="card-icon" style="background:#f5f3ff;">🤖</div> Agent Activity</h2>
+            <h2>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="color:var(--purple-bold)"><path d="M8 1a3 3 0 00-3 3 3 3 0 003 3 3 3 0 003-3 3 3 0 00-3-3zm0 8c-3.33 0-5 1.67-5 2.5V13h10v-1.5C13 10.67 11.33 9 8 9z"/></svg>
+              Agent Activity
+            </h2>
           </div>
           <div class="agent-list" id="agent-list">
-            <div style="padding:20px;text-align:center;color:var(--text-muted);">
-              <div class="spinner" style="margin:0 auto 8px;"></div> Initialising…
+            <div style="padding:20px;text-align:center;color:var(--n400);">
+              <div class="spinner" style="margin:0 auto 8px;"></div>
+              <div style="font-size:12px;">Initialising…</div>
             </div>
           </div>
           <div class="run-footer">
-            <div class="rf-item" style="font-size:11px;">Agents retrieve evidence automatically — no manual uploads required</div>
+            <div class="rf-item">Agents are bounded — no autonomous gate approval</div>
           </div>
         </div>
 
         <!-- Connector Status -->
         <div class="card">
           <div class="card-header">
-            <h2><div class="card-icon" style="background:#f0fdf4;">🔌</div> Evidence Sources</h2>
+            <h2>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="color:var(--green-bold)"><path d="M4.5 7h-3v2h3V7zm10 0h-3v2h3V7zm-5-4V1H6.5v2H4v2h1.5v2h5V5H12V3h-2.5z"/></svg>
+              Evidence Sources
+            </h2>
             <span class="wf-note">Phase 1</span>
           </div>
           <div class="connector-row">
             <div class="conn-left">
-              <div class="conn-ico">📁</div>
+              <div class="conn-ico">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M14 3H9.83A2 2 0 008 2H2a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1z"/></svg>
+              </div>
               <div>
                 <div class="conn-name">SharePoint</div>
                 <div class="conn-count" id="conn-sp-count">Connecting…</div>
@@ -231,21 +355,18 @@
             </div>
             <div class="conn-status off"><span class="dot gray"></span> Phase 2</div>
           </div>
-          <div class="connector-row" style="opacity:.5;">
-            <div class="conn-left"><div class="conn-ico">📚</div>
-              <div><div class="conn-name">Confluence <span class="phase2-tag">Phase 2</span></div><div class="conn-count">Not configured</div></div>
-            </div>
-            <div class="conn-status off"><span class="dot gray"></span> Phase 2</div>
-          </div>
           <div class="run-footer">
             <div class="rf-item">Phase 1: SharePoint only · Read-only · Least-privilege</div>
           </div>
         </div>
 
-        <!-- Pipeline -->
+        <!-- Audit Pipeline -->
         <div class="card">
           <div class="card-header">
-            <h2><div class="card-icon" style="background:#eff6ff;">⚙️</div> Audit Pipeline</h2>
+            <h2>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="color:var(--blue-bold)"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm-.75 10.5V7.25l3.5 2-3.5 2.25z"/></svg>
+              Audit Pipeline
+            </h2>
             <span class="wf-note">Step Functions</span>
           </div>
           <div class="pipeline" id="pipeline"></div>
@@ -254,42 +375,63 @@
         <!-- Report & Actions -->
         <div class="card">
           <div class="card-header">
-            <h2><div class="card-icon" style="background:#fff7ed;">📤</div> Report &amp; Actions</h2>
+            <h2>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="color:var(--yellow-text)"><path d="M6 8L2 4h3V0h2v4h3L6 8zm-5 2h10v2H1v-2z"/></svg>
+              Report &amp; Actions
+            </h2>
           </div>
           <div class="report-actions">
             <div class="action-row" onclick="exportReport()">
-              <div class="ar-left"><div class="ar-ico" style="background:#eff6ff;">📄</div>
-                <div><div class="ar-title">Export Gate Report</div><div class="ar-sub">Evidence links, criteria, verdicts &amp; audit log</div></div>
+              <div class="ar-left">
+                <div class="ar-ico" style="background:var(--blue-subtle);">
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="var(--blue-bold)"><path d="M9 1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V5L9 1zm0 1.5L11.5 5H9V2.5z"/></svg>
+                </div>
+                <div>
+                  <div class="ar-title">Export Gate Report</div>
+                  <div class="ar-sub">Evidence, criteria, verdicts &amp; audit log</div>
+                </div>
               </div><span class="ar-arrow">›</span>
             </div>
             <div class="action-row" onclick="openReauditModal()">
-              <div class="ar-left"><div class="ar-ico" style="background:#f5f3ff;">🔁</div>
-                <div><div class="ar-title">Request Re-Audit</div><div class="ar-sub">New linked run · agents re-collect evidence · original preserved</div></div>
+              <div class="ar-left">
+                <div class="ar-ico" style="background:var(--n20);">
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M13 6A5 5 0 103 6H1l3-3 3 3H5a3 3 0 106 0h2z"/></svg>
+                </div>
+                <div>
+                  <div class="ar-title">Request Re-Audit</div>
+                  <div class="ar-sub">New linked run · agents re-collect evidence</div>
+                </div>
               </div><span class="ar-arrow">›</span>
             </div>
             <div class="action-row" onclick="openGateDecisionModal()">
-              <div class="ar-left"><div class="ar-ico" style="background:#fff1f2;">✍️</div>
-                <div><div class="ar-title">Record Gate Decision</div><div class="ar-sub">Approve / Reject — waivers require rationale &amp; expiry</div></div>
+              <div class="ar-left">
+                <div class="ar-ico" style="background:var(--green-subtle);">
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="var(--green-bold)"><path d="M13 3L6 10 3 7 2 8l4 4 8-8-1-1z"/></svg>
+                </div>
+                <div>
+                  <div class="ar-title">Record Gate Decision</div>
+                  <div class="ar-sub">Approve / Reject — waivers require expiry</div>
+                </div>
               </div><span class="ar-arrow">›</span>
             </div>
           </div>
-          <div id="gate-decision-display" style="display:none;padding:14px 16px;border-top:1px solid var(--border);"></div>
+          <div id="gate-decision-display" style="display:none;padding:12px 16px;border-top:1px solid var(--n40);font-size:13px;"></div>
         </div>
 
       </div>
-    </div>
-
+    </div><!-- end two-col -->
   </main>
-</div>
+</div><!-- end main-wrap -->
 
-<!-- ═══ MODALS ═══ -->
 
-<!-- Waiver Modal -->
+<!-- ════════ MODALS ════════ -->
+
+<!-- Waiver -->
 <div class="modal-overlay" id="waiver-modal" style="display:none;" onclick="closeModalOnOverlay(event,'waiver-modal')">
   <div class="modal">
-    <div class="modal-header"><h3>🔖 Record Waiver</h3><button class="modal-close" onclick="closeModal('waiver-modal')">✕</button></div>
+    <div class="modal-header">Record Waiver <button class="modal-close" onclick="closeModal('waiver-modal')">✕</button></div>
     <div class="modal-body">
-      <div class="modal-notice warn">A waiver is <strong>not a Pass</strong>. Requires rationale, authorised approver, and expiry date. Reported separately.</div>
+      <div class="modal-notice warn">A waiver is <strong>not a Pass</strong>. Requires rationale, authorised approver, and expiry date. Reported separately and not counted as passing.</div>
       <input type="hidden" id="waiver-ctrl-id"/>
       <div class="form-group"><label>Control</label><div class="form-static" id="waiver-ctrl-label">—</div></div>
       <div class="form-group"><label>Rationale <span class="required">*</span></label><textarea id="waiver-rationale" placeholder="Why this control cannot be met and why a waiver is justified…" rows="3"></textarea></div>
@@ -299,15 +441,15 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('waiver-modal')">Cancel</button>
-      <button class="btn btn-waiver" onclick="submitWaiver()">🔖 Record Waiver</button>
+      <button class="btn btn-waiver" onclick="submitWaiver()">Record Waiver</button>
     </div>
   </div>
 </div>
 
-<!-- Confirm Fail Modal -->
+<!-- Confirm Fail -->
 <div class="modal-overlay" id="fail-modal" style="display:none;" onclick="closeModalOnOverlay(event,'fail-modal')">
   <div class="modal">
-    <div class="modal-header"><h3>❌ Confirm Fail</h3><button class="modal-close" onclick="closeModal('fail-modal')">✕</button></div>
+    <div class="modal-header">Confirm Failure <button class="modal-close" onclick="closeModal('fail-modal')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="fail-ctrl-id"/>
       <div class="form-group"><label>Control</label><div class="form-static" id="fail-ctrl-label">—</div></div>
@@ -315,7 +457,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('fail-modal')">Cancel</button>
-      <button class="btn btn-danger" onclick="submitFail()">❌ Confirm Fail</button>
+      <button class="btn btn-danger" onclick="submitFail()">Confirm Failure</button>
     </div>
   </div>
 </div>
@@ -323,7 +465,7 @@
 <!-- Assign Owner -->
 <div class="modal-overlay" id="assign-modal" style="display:none;" onclick="closeModalOnOverlay(event,'assign-modal')">
   <div class="modal">
-    <div class="modal-header"><h3>👤 Assign Owner</h3><button class="modal-close" onclick="closeModal('assign-modal')">✕</button></div>
+    <div class="modal-header">Assign Owner <button class="modal-close" onclick="closeModal('assign-modal')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="assign-ctrl-id"/>
       <div class="form-group"><label>Control</label><div class="form-static" id="assign-ctrl-label">—</div></div>
@@ -336,42 +478,64 @@
   </div>
 </div>
 
-<!-- Re-Audit Modal -->
+<!-- Edit Resolution -->
+<div class="modal-overlay" id="resolution-modal" style="display:none;" onclick="closeModalOnOverlay(event,'resolution-modal')">
+  <div class="modal modal-wide">
+    <div class="modal-header">Edit Resolution Info <button class="modal-close" onclick="closeModal('resolution-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="modal-notice info">Add or update the failure explanation and resolution guidance. This is shown to everyone viewing this control.</div>
+      <input type="hidden" id="res-ctrl-id"/>
+      <div class="form-group"><label>Control</label><div class="form-static" id="res-ctrl-label">—</div></div>
+      <div class="form-group">
+        <label>Detailed Failure Reason <span class="required">*</span></label>
+        <textarea id="res-reason" rows="4" placeholder="Full explanation of why this control failed — context, root cause, impact…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Resolution / Documentation URL</label>
+        <input type="url" id="res-url" placeholder="https://docs.company.com/…"/>
+      </div>
+      <div id="res-error" class="form-error" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('resolution-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitResolution()">Save Resolution Info</button>
+    </div>
+  </div>
+</div>
+
+<!-- Re-Audit -->
 <div class="modal-overlay" id="reaudit-modal" style="display:none;" onclick="closeModalOnOverlay(event,'reaudit-modal')">
   <div class="modal modal-wide">
-    <div class="modal-header"><h3>🔁 Request Re-Audit</h3><button class="modal-close" onclick="closeModal('reaudit-modal')">✕</button></div>
+    <div class="modal-header">Request Re-Audit <button class="modal-close" onclick="closeModal('reaudit-modal')">✕</button></div>
     <div class="modal-body">
-      <div class="modal-notice info">
-        A re-audit creates a <strong>new linked run</strong>. Agents automatically re-collect evidence for selected controls only.
-        Original results are preserved. Human-initiated only.
-      </div>
+      <div class="modal-notice info">A re-audit creates a <strong>new linked run</strong>. Only selected controls are re-run — agents auto-collect fresh evidence. Original results are preserved.</div>
       <div class="form-group"><label>Reason <span class="required">*</span></label>
         <textarea id="reaudit-reason" placeholder="e.g. Approval signature added, evidence updated, finding challenged…" rows="2"></textarea>
       </div>
       <div class="form-group">
         <label>Select Controls to Re-Run <span class="required">*</span></label>
-        <div id="reaudit-controls-list" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:12px;"></div>
+        <div id="reaudit-controls-list" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;border:1px solid var(--n40);border-radius:var(--r);padding:12px;"></div>
       </div>
       <div id="reaudit-error" class="form-error" style="display:none;"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('reaudit-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="submitReaudit()">🔁 Start Re-Audit Run</button>
+      <button class="btn btn-primary" onclick="submitReaudit()">Start Re-Audit Run</button>
     </div>
   </div>
 </div>
 
-<!-- Gate Decision Modal -->
+<!-- Gate Decision -->
 <div class="modal-overlay" id="gate-modal" style="display:none;" onclick="closeModalOnOverlay(event,'gate-modal')">
   <div class="modal">
-    <div class="modal-header"><h3>✍️ Record Gate Decision</h3><button class="modal-close" onclick="closeModal('gate-modal')">✕</button></div>
+    <div class="modal-header">Record Gate Decision <button class="modal-close" onclick="closeModal('gate-modal')">✕</button></div>
     <div class="modal-body">
-      <div class="modal-notice info">Gate decision is recorded by an authorised Comviva reviewer. Agents cannot approve gate readiness.</div>
+      <div class="modal-notice info">Gate decisions are recorded by an authorised Comviva reviewer. Agents cannot approve gate readiness.</div>
       <div class="form-group"><label>Decision <span class="required">*</span></label>
         <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">
-          <label class="radio-opt"><input type="radio" name="gate-dec" value="approve"/> <span class="radio-label approve-label">✅ Approve</span></label>
-          <label class="radio-opt"><input type="radio" name="gate-dec" value="reject"/>  <span class="radio-label reject-label">❌ Reject</span></label>
-          <label class="radio-opt"><input type="radio" name="gate-dec" value="defer"/>   <span class="radio-label defer-label">⏸ Defer</span></label>
+          <label class="radio-opt"><input type="radio" name="gate-dec" value="approve"/> <span class="approve-label">✓ Approve</span></label>
+          <label class="radio-opt"><input type="radio" name="gate-dec" value="reject"/>  <span class="reject-label">✕ Reject</span></label>
+          <label class="radio-opt"><input type="radio" name="gate-dec" value="defer"/>   <span class="defer-label">⏸ Defer</span></label>
         </div>
       </div>
       <div class="form-group"><label>Reviewer Name <span class="required">*</span></label><input type="text" id="gate-reviewer" placeholder="Authorised reviewer…"/></div>
@@ -380,13 +544,16 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('gate-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="submitGateDecision()">✍️ Record Decision</button>
+      <button class="btn btn-primary" onclick="submitGateDecision()">Record Decision</button>
     </div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
-<script>const RUN_ID = "{{ run_id }}";</script>
+<script>
+  const RUN_ID = "{{ run_id }}";
+  function startNewAudit() { window.location.href = '/'; }
+</script>
 <script src="/static/app.js"></script>
 </body>
 </html>

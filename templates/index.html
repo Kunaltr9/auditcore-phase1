@@ -8,49 +8,77 @@
 </head>
 <body>
 
+<!-- Global topnav -->
+<nav class="topbar">
+  <div class="topbar-appsw" title="App switcher">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+      <rect x="1" y="1" width="5" height="5" rx="1"/><rect x="7" y="1" width="5" height="5" rx="1"/>
+      <rect x="13" y="1" width="4" height="5" rx="1"/><rect x="1" y="7" width="5" height="5" rx="1"/>
+      <rect x="7" y="7" width="5" height="5" rx="1"/><rect x="13" y="7" width="4" height="5" rx="1"/>
+      <rect x="1" y="13" width="5" height="4" rx="1"/><rect x="7" y="13" width="5" height="4" rx="1"/>
+      <rect x="13" y="13" width="4" height="4" rx="1"/>
+    </svg>
+  </div>
+  <a class="topbar-logo" href="/">
+    <div class="topbar-logo-icon">
+      <svg viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M12 2L4 5.5V11c0 4.97 3.4 9.63 8 10.93C16.6 20.63 20 15.97 20 11V5.5L12 2z"/></svg>
+    </div>
+    <span class="topbar-logo-name">AuditCore</span>
+  </a>
+  <div class="topbar-search">
+    <span class="topbar-search-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5.5" cy="5.5" r="4"/><path d="M9 9l3 3"/></svg>
+    </span>
+    <input type="text" placeholder="Search AuditCore" readonly/>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-create" onclick="document.getElementById('start-modal').style.display='flex'">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6.75 1.25H5.25v4H1.25v1.5h4v4h1.5v-4h4v-1.5h-4v-4z"/></svg>
+      Create
+    </button>
+    <div class="status-pill phase1"><span class="dot blue" style="background:var(--blue-bold);"></span> Phase 1 Pilot</div>
+    <button class="topbar-icon-btn" title="Notifications">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a5 5 0 00-5 5v2.5L1.5 10H14.5L13 8.5V6a5 5 0 00-5-5zm0 14a2 2 0 002-2H6a2 2 0 002 2z"/></svg>
+    </button>
+    <button class="topbar-icon-btn" title="Help">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 11.5a1 1 0 110-2 1 1 0 010 2zm.75-4.5h-1.5C7.25 6.5 5 6.5 5 4.5 5 3.1 6.35 2 8 2s3 1.1 3 2.5c0 1.65-2.25 3.5-2.25 3.5z"/></svg>
+    </button>
+    <div class="topbar-avatar">QA</div>
+  </div>
+</nav>
+
 {% set active_page = 'dashboard' %}
 {% include '_nav.html' %}
 
 <div class="main-wrap">
-  <header class="topbar">
-    <div class="topbar-breadcrumb">
-      <span class="current">Dashboard</span>
-    </div>
-    <div class="topbar-right">
-      <div class="topbar-pill phase1-pill">
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="flex-shrink:0;"><circle cx="5" cy="5" r="5"/></svg>
-        Phase 1 Pilot
-      </div>
-    </div>
-  </header>
-
   <main class="page">
 
+    <!-- Page header -->
     <div class="page-header">
       <div>
-        <div class="page-title">AI-Driven Audit &amp; Compliance Platform</div>
-        <div class="page-subtitle">Comviva · Phase 1 Pilot · G1 Gate — RFP to Solution Proposal</div>
+        <div class="page-title">AuditCore Dashboard</div>
+        <div class="page-subtitle">AI-Driven Audit &amp; Compliance · Comviva Phase 1 Pilot · G1 — RFP to Solution Proposal</div>
       </div>
-      <button class="btn btn-secondary" onclick="window.location.href='/setup'">⚙️ Manage Checklist &amp; Policies</button>
+      <a href="/setup" class="btn btn-secondary btn-sm">⚙ Manage Checklist</a>
     </div>
 
     <!-- Flow stepper -->
-    <div class="flow-stepper" style="margin-bottom:24px;">
+    <div class="flow-stepper">
       <div class="flow-step done">
         <div class="flow-step-num">1</div>
-        <div class="flow-step-label">Define Checklist<br/><span><a href="/setup" style="color:var(--accent);">Setup →</a></span></div>
+        <div class="flow-step-label">Define Checklist<br/><span><a href="/setup" style="color:var(--blue-bold);">Setup →</a></span></div>
       </div>
-      <div class="flow-step-arrow">→</div>
+      <span class="flow-step-arrow">›</span>
       <div class="flow-step done">
         <div class="flow-step-num">2</div>
         <div class="flow-step-label">Approve &amp; Version<br/><span id="cl-status-inline">Checking…</span></div>
       </div>
-      <div class="flow-step-arrow">→</div>
+      <span class="flow-step-arrow">›</span>
       <div class="flow-step active">
         <div class="flow-step-num">3</div>
         <div class="flow-step-label">Start Audit<br/><span>Agents auto-collect evidence</span></div>
       </div>
-      <div class="flow-step-arrow">→</div>
+      <span class="flow-step-arrow">›</span>
       <div class="flow-step upcoming">
         <div class="flow-step-num">4</div>
         <div class="flow-step-label">Review Results<br/><span>Pass / Fail / Waive</span></div>
@@ -58,41 +86,50 @@
     </div>
 
     <!-- Active checklist banner -->
-    <div class="card" style="margin-bottom:20px;" id="checklist-banner">
+    <div class="card" id="checklist-banner" style="margin-bottom:20px;">
       <div class="card-header">
-        <h2><div class="card-icon" style="background:#f0fdf4;">📋</div> Active Checklist for G1 Audits</h2>
-        <a href="/setup" class="btn btn-secondary btn-sm">✏️ Edit Checklist</a>
+        <h2>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="color:var(--blue-bold)"><path d="M13 1H3a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V2a1 1 0 00-1-1zm-2 10H5v-1h6v1zm0-3H5V7h6v1zm0-3H5V3h6v1z"/></svg>
+          Active Checklist — G1 Audits
+        </h2>
+        <a href="/setup" class="btn btn-secondary btn-sm">Edit →</a>
       </div>
-      <div style="padding:16px 20px;" id="checklist-banner-body">
-        <div class="spinner" style="margin:8px auto;"></div>
+      <div style="padding:14px 20px;" id="checklist-banner-body">
+        <div class="spinner" style="margin:4px auto;"></div>
       </div>
     </div>
 
-    <!-- Phase 1 Notice -->
-    <div class="policy-notice" style="margin-bottom:20px;">
-      <span class="pn-icon">🤖</span>
-      <div>
-        <strong>How the audit works:</strong>
-        When you start an audit, agents automatically connect to <strong>SharePoint</strong> (Phase 1) and retrieve evidence for every control in your checklist.
-        Each piece of evidence is evaluated against your defined acceptance criteria — you do not upload anything.
-        Results are shown with the evidence link, rationale, and agent verdict per control.
+    <!-- Phase 1 info -->
+    <div class="info-banner info" style="margin-bottom:20px;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--blue-bold)" style="flex-shrink:0;margin-top:1px;"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.5 10.5h-1v-5h1v5zm0-6.5h-1V3.5h1V5z"/></svg>
+      <div style="font-size:13px;">
+        When you start an audit, agents automatically connect to <strong>SharePoint</strong> (Phase 1) and retrieve
+        evidence for every control in your checklist. Each control is evaluated against your defined acceptance criteria.
+        Failed controls show full failure detail, resolution steps, and a documentation link.
       </div>
     </div>
 
     <!-- Projects -->
     <div class="card" style="margin-bottom:24px;">
       <div class="card-header">
-        <h2><div class="card-icon" style="background:#eff6ff;">📁</div> Comviva Projects</h2>
+        <h2>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="color:var(--n500)"><path d="M14 3H9.83A2 2 0 008 2H2a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1zm-1 9H3V5h10v7z"/></svg>
+          Comviva Projects
+        </h2>
       </div>
       <div id="project-grid" style="padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;">
         {% for p in projects %}
         <div class="project-card">
           <div class="project-card-top">
             <div>
-              <div class="project-card-name">{{ p.name }}</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <div style="width:24px;height:24px;border-radius:var(--r);background:var(--blue-bold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">
+                  {{ p.name[0] }}
+                </div>
+                <div class="project-card-name">{{ p.name }}</div>
+              </div>
               <div class="project-card-meta">{{ p.pin }} · {{ p.type }} · Lifecycle {{ p.lifecycle }}</div>
-              <div class="project-card-owner">Delivery Owner: {{ p.delivery_owner }}</div>
-              <div class="project-card-bu">{{ p.business_unit }}</div>
+              <div class="project-card-owner">Owner: {{ p.delivery_owner }} · {{ p.business_unit }}</div>
             </div>
             <div class="project-card-gates">
               {% for g in p.applicable_gates %}
@@ -101,21 +138,28 @@
             </div>
           </div>
           <div class="project-card-actions">
-            <button class="btn btn-primary" id="btn-start-{{ p.pin.replace('-','_') }}" onclick="startAudit('{{ p.pin }}')">
-              ▶ Start G1 Audit
+            <button class="btn btn-primary btn-sm" onclick="startAudit('{{ p.pin }}')">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><path d="M2 1.5l7 4-7 4V1.5z"/></svg>
+              Start G1 Audit
             </button>
-            <span class="badge blue" style="font-size:11px;">Agents auto-collect evidence</span>
+            <span style="font-size:11px;color:var(--n400);">Agents auto-collect evidence</span>
           </div>
         </div>
         {% endfor %}
       </div>
     </div>
 
-    <!-- Recent Runs -->
+    <!-- Recent runs -->
     <div class="card">
       <div class="card-header">
-        <h2><div class="card-icon" style="background:#f5f3ff;">🕐</div> Audit Run History</h2>
-        <button class="btn btn-ghost btn-sm" onclick="loadRuns()">↺ Refresh</button>
+        <h2>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="color:var(--n500)"><path d="M14 2H2a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1V3a1 1 0 00-1-1zm-1 10H3V4h10v8z"/></svg>
+          Recent Audit Runs
+        </h2>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <a href="/reports" class="btn btn-secondary btn-sm">View all →</a>
+          <button class="btn btn-ghost btn-sm" onclick="loadRuns()">↺</button>
+        </div>
       </div>
       <div style="overflow-x:auto;">
         <table>
@@ -123,17 +167,18 @@
             <tr>
               <th>Run ID</th>
               <th>Project</th>
-              <th>PIN</th>
-              <th>Gate</th>
               <th>Checklist</th>
               <th>Gate Status</th>
+              <th>Controls</th>
               <th>Started</th>
               <th>Type</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="runs-tbody">
-            <tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:32px;">No audit runs yet. Start one above.</td></tr>
+            <tr><td colspan="8" style="text-align:center;color:var(--n400);padding:40px;">
+              No audit runs yet. Start one above.
+            </td></tr>
           </tbody>
         </table>
       </div>
@@ -142,14 +187,14 @@
   </main>
 </div>
 
-<!-- Start Audit Modal -->
+<!-- Start audit modal -->
 <div class="modal-overlay" id="start-modal" style="display:none;">
-  <div class="modal">
-    <div class="modal-header"><h3>Starting G1 Audit…</h3></div>
-    <div class="modal-body" style="text-align:center;padding:36px;">
-      <div class="spinner" style="margin:0 auto 16px;"></div>
-      <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;" id="start-modal-title">Initialising run…</div>
-      <div style="font-size:12.5px;color:var(--text-muted);" id="start-modal-sub">Pinning checklist version · preparing connectors</div>
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-header">Starting Audit…</div>
+    <div class="modal-body" style="text-align:center;padding:36px 20px;">
+      <div class="spinner" style="margin:0 auto 16px;width:32px;height:32px;"></div>
+      <div style="font-size:14px;font-weight:600;color:var(--n800);margin-bottom:4px;" id="start-modal-title">Initialising run…</div>
+      <div style="font-size:12px;color:var(--n500);" id="start-modal-sub">Pinning checklist · connecting to SharePoint</div>
     </div>
   </div>
 </div>
@@ -160,113 +205,79 @@
 let _activeChecklist = null;
 
 async function loadChecklist() {
-  const res = await fetch('/api/checklist');
-  const cls = await res.json();
+  const cls = await (await fetch('/api/checklist')).json();
   _activeChecklist = cls.find(c => c.gate === 'G1' && c.approved) || cls[0];
-
-  // Update stepper
   const st = document.getElementById('cl-status-inline');
   if (st) st.innerHTML = _activeChecklist?.approved
-    ? `<span style="color:var(--pass);font-weight:600;">✅ ${_activeChecklist.version} approved</span>`
-    : `<span style="color:var(--warn);font-weight:600;"><a href="/setup" style="color:var(--warn);">⚠️ Not approved yet</a></span>`;
-
-  // Banner
+    ? `<span style="color:var(--green-text);font-weight:600;">✓ ${_activeChecklist.version} approved</span>`
+    : `<a href="/setup" style="color:var(--yellow-text);font-weight:600;">⚠ Not approved</a>`;
   const body = document.getElementById('checklist-banner-body');
-  if (!_activeChecklist) {
-    body.innerHTML = `<div style="color:var(--warn);">No checklist defined. <a href="/setup">Set up your checklist →</a></div>`; return;
-  }
-  const approvedBadge = _activeChecklist.approved
-    ? `<span class="badge pass"><span class="dot green"></span> Approved · ${_activeChecklist.approved_by} · ${_activeChecklist.approved_at}</span>`
-    : `<span class="badge review"><span class="dot amber"></span> Not yet approved — <a href="/setup">approve now</a></span>`;
-
+  if (!_activeChecklist) { body.innerHTML = `<div style="color:var(--yellow-text);font-size:13px;">No checklist defined. <a href="/setup">Set up now →</a></div>`; return; }
+  const ap = _activeChecklist.approved
+    ? `<span class="lz lz-done">Approved · ${_activeChecklist.approved_by}</span>`
+    : `<span class="lz lz-review">Not approved — <a href="/setup">approve now</a></span>`;
   body.innerHTML = `
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
       <div>
-        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">${_activeChecklist.name}</div>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
-          <span class="badge blue">Version ${_activeChecklist.version}</span>
-          ${approvedBadge}
-          <span class="badge na">${_activeChecklist.controls.length} controls</span>
-          <span class="badge na">${(_activeChecklist.policies||[]).length} policies</span>
-        </div>
-        <div style="font-size:12px;color:var(--text-muted);">
-          Controls: ${_activeChecklist.controls.map(c=>`<span class="ctrl-id" style="font-size:10px;">${c.id}</span>`).join(' ')}
+        <div style="font-size:14px;font-weight:700;color:var(--n800);margin-bottom:6px;">${_activeChecklist.name}</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span class="lz lz-inprogress">${_activeChecklist.version}</span>
+          ${ap}
+          <span class="lz lz-default">${_activeChecklist.controls.length} controls</span>
+          <span class="lz lz-default">${(_activeChecklist.policies||[]).length} policies</span>
         </div>
       </div>
     </div>
-    ${!_activeChecklist.approved ? `<div class="modal-notice warn" style="margin-top:12px;">⚠️ This checklist is not approved. <a href="/setup">Go to Checklist Setup →</a> to approve it before starting an audit.</div>` : ''}`;
+    ${!_activeChecklist.approved ? `<div class="info-banner warning" style="margin-top:12px;margin-bottom:0;">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="var(--yellow-bold)" style="flex-shrink:0;"><path d="M7 1L0 13h14L7 1zm-.5 4h1v4h-1V5zm.5 6a.75.75 0 110-1.5A.75.75 0 017 11z"/></svg>
+      <div style="font-size:12px;">Checklist is not approved. <a href="/setup">Go to Checklist Setup →</a> to approve before starting an audit.</div>
+    </div>` : ''}`;
 }
 
 async function startAudit(pin) {
-  if (!_activeChecklist) { showToast('❌ No checklist found. Set up your checklist first.'); return; }
+  if (!_activeChecklist) { showToast('No checklist found. Set up first.'); return; }
   if (!_activeChecklist.approved) {
-    showToast('❌ Checklist must be approved before starting an audit. Go to Checklist Setup.');
-    setTimeout(() => window.location.href = '/setup', 1500);
-    return;
+    showToast('Checklist must be approved before starting an audit.');
+    setTimeout(() => window.location.href = '/setup', 1500); return;
   }
-
   document.getElementById('start-modal-title').textContent = 'Starting G1 Audit…';
   document.getElementById('start-modal-sub').textContent   = `Pinning checklist ${_activeChecklist.version} · connecting to SharePoint`;
   document.getElementById('start-modal').style.display = 'flex';
-
   try {
-    const res  = await fetch('/api/audit/start', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ pin, gate:'G1', checklist_id: _activeChecklist.checklist_id })
-    });
+    const res  = await fetch('/api/audit/start', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ pin, gate:'G1', checklist_id: _activeChecklist.checklist_id }) });
     const data = await res.json();
-    if (data.redirect) {
-      window.location.href = data.redirect;
-    } else {
-      document.getElementById('start-modal').style.display = 'none';
-      showToast('❌ ' + (data.error || 'Failed to start audit'));
-    }
-  } catch(e) {
-    document.getElementById('start-modal').style.display = 'none';
-    showToast('❌ ' + e.message);
-  }
+    if (data.redirect) window.location.href = data.redirect;
+    else { document.getElementById('start-modal').style.display='none'; showToast('Error: ' + (data.error||'Failed')); }
+  } catch(e) { document.getElementById('start-modal').style.display='none'; showToast(e.message); }
 }
 
 async function loadRuns() {
-  const runs = await (await fetch('/api/runs')).json();
+  const runs  = await (await fetch('/api/runs')).json();
   const tbody = document.getElementById('runs-tbody');
-  if (!runs.length) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:32px;">No audit runs yet.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = runs.map(r => {
-    const badge = statusBadge(r.gate_status);
-    const type  = r.is_reaudit
-      ? `<span class="badge blue"><span class="dot blue"></span> Re-Audit</span>`
-      : `<span class="badge na">Initial</span>`;
+  if (!runs.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--n400);padding:32px;">No audit runs yet.</td></tr>'; return; }
+  tbody.innerHTML = runs.slice(0,8).map(r => {
+    const st  = { pass:`<span class="lz lz-done">Pass</span>`, fail:`<span class="lz lz-fail">Fail</span>`, needs_review:`<span class="lz lz-review">Needs Review</span>`, in_progress:`<span class="lz lz-inprogress">In Progress</span>` }[r.gate_status] || `<span class="lz lz-default">${r.gate_status}</span>`;
+    const type = r.is_reaudit ? `<span class="lz lz-inprogress">Re-Audit</span>` : `<span class="lz lz-default">Initial</span>`;
     return `<tr>
-      <td style="font-family:monospace;font-size:11px;">${r.run_id}</td>
-      <td style="font-size:12.5px;">${r.project_name}</td>
-      <td style="font-family:monospace;font-size:11px;">${r.pin}</td>
-      <td><span class="badge blue">${r.gate}</span></td>
-      <td style="font-size:11.5px;color:var(--text-muted);">${r.checklist_version || '—'}</td>
-      <td>${badge}</td>
-      <td style="font-size:11.5px;color:var(--text-muted);">${r.started_at || '—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;white-space:nowrap;">${r.run_id}</td>
+      <td style="font-size:13px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.project_name}</td>
+      <td style="font-size:11px;color:var(--n500);">${r.policy_version || '—'}</td>
+      <td>${st}</td>
+      <td style="font-size:12px;">
+        <span style="color:var(--green-text);font-weight:600;">${r.summary?.pass ?? '—'}✓</span>
+        <span style="color:var(--red-text);margin-left:4px;">${r.summary?.fail ?? '—'}✗</span>
+      </td>
+      <td style="font-size:11px;color:var(--n400);white-space:nowrap;">${r.started_at || '—'}</td>
       <td>${type}</td>
       <td><a href="/audit/${r.run_id}" class="btn btn-secondary btn-sm">Open →</a></td>
     </tr>`;
   }).join('');
 }
 
-function statusBadge(s) {
-  const m = {
-    pass:         '<span class="badge pass"><span class="dot green"></span> Pass</span>',
-    fail:         '<span class="badge fail"><span class="dot red"></span> Fail</span>',
-    needs_review: '<span class="badge review"><span class="dot amber"></span> Needs Review</span>',
-    in_progress:  '<span class="badge inprog"><span class="dot amber"></span> In Progress</span>',
-  };
-  return m[s] || `<span class="badge na">${s}</span>`;
-}
-
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.style.display = 'block'; t.classList.add('toast-show');
-  setTimeout(() => { t.classList.remove('toast-show'); setTimeout(() => t.style.display='none', 300); }, 3500);
+  setTimeout(() => { t.classList.remove('toast-show'); setTimeout(() => t.style.display='none',300); }, 3500);
 }
 
 loadChecklist();

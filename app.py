@@ -160,7 +160,8 @@ def _evaluate_control(ctrl, evidence):
     """
     Agents evaluate the customer-defined acceptance criteria
     against the evidence retrieved from connected systems.
-    Returns (status, rationale, finding_detail, excerpt)
+    Returns (status, rationale, finding_detail, excerpt,
+             detailed_reason, resolution_steps, resolution_url)
     """
     cid  = ctrl["id"]
     crit = ctrl["acceptance_criteria"]
@@ -170,13 +171,26 @@ def _evaluate_control(ctrl, evidence):
         return ("unable_to_verify",
                 "Dataverse connector is not configured in the Phase 1 pilot. Manual verification required. Not treated as a failure.",
                 f"Acceptance criteria: {crit}\nConnector status: Phase 2 — not configured in pilot.",
-                "Connector: Dataverse\nStatus: Not configured (Phase 1 pilot)\nAction: Manual check required or re-run after Phase 2 connector enabled.")
+                "Connector: Dataverse\nStatus: Not configured (Phase 1 pilot)\nAction: Manual check required or re-run after Phase 2 connector enabled.",
+                "The Dataverse connector that verifies project registration is not active in the Phase 1 pilot scope. This control cannot be automatically evaluated until Phase 2 connectors are configured.\n\nThis result is marked Unable to Verify — it is NOT automatically a failure. A manual check can satisfy this control.",
+                ["Manually verify the project PIN exists in the Comviva Dataverse project registry",
+                 "Confirm the project status is set to Active",
+                 "Record the manual verification result in the audit log",
+                 "Or wait for Phase 2 deployment to enable the Dataverse connector"],
+                "https://learn.microsoft.com/en-us/power-apps/maker/data-platform/")
 
     if not ev.get("found"):
         return ("fail",
                 f"Evidence Agent searched {ev.get('src','repository')} — 0 matching documents found for this PIN.",
                 f"Acceptance criteria: {crit}\nSearch result: {ev.get('meta','')}",
-                f"Expected: document matching control {cid}\nFound: 0 documents\nSource: {ev.get('src','')}")
+                f"Expected: document matching control {cid}\nFound: 0 documents\nSource: {ev.get('src','')}",
+                f"The Evidence Agent performed a targeted search of SharePoint for documents matching control {cid} and project PIN. The search returned zero results.\n\nThis means either: (a) the required document has not been uploaded, (b) it exists but is not linked to this project PIN, or (c) the document naming convention does not match the agent's search parameters.",
+                ["Check if the document exists in SharePoint under a different name or folder",
+                 "Ensure the document metadata includes the correct project PIN",
+                 "Upload the missing document to the designated SharePoint project library",
+                 "Update document metadata to include PIN and document type tags",
+                 "Request a re-audit once the document is uploaded and tagged"],
+                "https://support.microsoft.com/en-us/office/sharepoint-document-management")
 
     meta = ev.get("meta","")
 
@@ -184,23 +198,44 @@ def _evaluate_control(ctrl, evidence):
         return ("fail",
                 "Approval metadata field is empty. No approver signature block detected. Acceptance criteria requires approval_status=Approved AND approver_id present.",
                 f"Acceptance criteria: {crit}\nEvidence metadata: {meta}",
-                'Expected: approval_status = "Approved"  AND  approver_id != null\nFound:    approval_status = "Draft"      AND  approver_id = null')
+                'Expected: approval_status = "Approved"  AND  approver_id != null\nFound:    approval_status = "Draft"      AND  approver_id = null',
+                "The proposal document (SP-4450) is still in Draft status. The approval signature block in section 9.1 has not been completed. The document was last modified by T. Williams but no approval workflow has been triggered in the SharePoint document management system.\n\nThis is a mandatory control — the gate cannot proceed until an authorised Comviva reviewer formally approves the proposal in the document system.",
+                ["Open Proposal_Draft_v2.docx in SharePoint (SP-4450)",
+                 "Navigate to section 9.1 — Approval Sign-Off",
+                 "Request approval from an authorised Comviva Delivery Manager via the SharePoint approval workflow",
+                 "Confirm approval_status changes to 'Approved' and approver_id is populated",
+                 "Return here and click 'Request Re-Audit' to re-run this control"],
+                "https://support.atlassian.com/jira-software-cloud/docs/approve-a-request/")
 
     if cid == "G1-C10":
         return ("needs_review",
                 "AI semantic check: section 4.2 Pricing Model detected but structured pricing table absent. AI confidence 61% — below the 80% threshold defined in acceptance criteria. Routed to human reviewer.",
                 f"Acceptance criteria: {crit}\nEvidence metadata: {meta}",
-                'Section 4.2 "Pricing Model": narrative text detected, structured table not found.\nRequired: unit pricing, volume tiers, payment schedule, currency.\nAI confidence: 61% (threshold: 80%)')
+                'Section 4.2 "Pricing Model": narrative text detected, structured table not found.\nRequired: unit pricing, volume tiers, payment schedule, currency.\nAI confidence: 61% (threshold: 80%)',
+                "The AI agent detected that section 4.2 Pricing Model contains narrative text but lacks the structured pricing table required by the Comviva checklist. The agent's confidence in the coverage assessment is 61%, which is below the 80% threshold required for an automatic pass.\n\nA human reviewer must examine section 4.2 and determine whether the content substantively satisfies the acceptance criteria.",
+                ["Open the proposal document and navigate to section 4.2 — Pricing Model",
+                 "Verify the section contains: unit pricing, volume tiers, payment schedule, and currency",
+                 "If the structured table is absent, request the proposal author to add it",
+                 "Once updated, return here and use 'Request Re-Audit' to re-evaluate this control",
+                 "Alternatively, record a reviewer override if the narrative format is acceptable"],
+                None)
 
     if cid == "G1-C11":
         return ("needs_review",
                 "3 of 14 HIGH-impact assumptions (A-07, A-11, A-13) have no owner or approval date. Acceptance criteria requires zero unowned HIGH-impact assumptions.",
                 f"Acceptance criteria: {crit}\nEvidence metadata: {meta}",
-                "A-07: Integration dependency on third-party API — owner: unassigned\nA-11: Go-live date fixed before UAT completion — owner: unassigned\nA-13: Regulatory approval assumed — owner: unassigned")
+                "A-07: Integration dependency on third-party API — owner: unassigned\nA-11: Go-live date fixed before UAT completion — owner: unassigned\nA-13: Regulatory approval assumed — owner: unassigned",
+                "The Assumptions Register (SP-4455) contains 14 assumptions. Three are classified as HIGH impact but have no assigned owner and no approval date recorded. Per Comviva policy, all HIGH-impact assumptions must be formally owned and approved before proceeding past G1.\n\nAffected assumptions: A-07 (third-party API dependency), A-11 (go-live before UAT), A-13 (regulatory approval assumed).",
+                ["Open Assumptions_Register.docx in SharePoint (SP-4455)",
+                 "Locate assumptions A-07, A-11, and A-13",
+                 "Assign a named Comviva team member as owner for each",
+                 "Record an approval date or escalation decision for each HIGH-impact assumption",
+                 "Re-upload the updated register and request a re-audit"],
+                None)
 
     return ("pass",
             f"Evidence found and acceptance criteria satisfied. {meta}",
-            None, None)
+            None, None, None, None, None)
 
 # ─────────────────────────────────────────────────────────
 # BACKGROUND AUDIT RUNNER
@@ -249,12 +284,15 @@ def _run_audit(run_id):
     p=f=0
     for ctrl in det_ctrls:
         time.sleep(1.2)
-        status, rationale, detail, excerpt = _evaluate_control(ctrl, CONNECTOR_EVIDENCE)
-        ctrl["status"]         = status
-        ctrl["rationale"]      = rationale
-        ctrl["finding_detail"] = detail
-        ctrl["finding_excerpt"]= excerpt
-        ctrl["checked_at"]     = _now_short()
+        status, rationale, detail, excerpt, detailed_reason, resolution_steps, resolution_url = _evaluate_control(ctrl, CONNECTOR_EVIDENCE)
+        ctrl["status"]           = status
+        ctrl["rationale"]        = rationale
+        ctrl["finding_detail"]   = detail
+        ctrl["finding_excerpt"]  = excerpt
+        ctrl["detailed_reason"]  = detailed_reason
+        ctrl["resolution_steps"] = resolution_steps
+        ctrl["resolution_url"]   = resolution_url
+        ctrl["checked_at"]       = _now_short()
         ctrl["evaluated_against"] = ctrl["acceptance_criteria"]
         if status == "pass": p += 1
         elif status == "fail": f += 1
@@ -271,12 +309,15 @@ def _run_audit(run_id):
     ai_ctrls = [c for c in controls if c["check_type"] == "ai-assisted"]
     for ctrl in ai_ctrls:
         time.sleep(2)
-        status, rationale, detail, excerpt = _evaluate_control(ctrl, CONNECTOR_EVIDENCE)
-        ctrl["status"]         = status
-        ctrl["rationale"]      = rationale
-        ctrl["finding_detail"] = detail
-        ctrl["finding_excerpt"]= excerpt
-        ctrl["checked_at"]     = _now_short()
+        status, rationale, detail, excerpt, detailed_reason, resolution_steps, resolution_url = _evaluate_control(ctrl, CONNECTOR_EVIDENCE)
+        ctrl["status"]           = status
+        ctrl["rationale"]        = rationale
+        ctrl["finding_detail"]   = detail
+        ctrl["finding_excerpt"]  = excerpt
+        ctrl["detailed_reason"]  = detailed_reason
+        ctrl["resolution_steps"] = resolution_steps
+        ctrl["resolution_url"]   = resolution_url
+        ctrl["checked_at"]       = _now_short()
         ctrl["evaluated_against"] = ctrl["acceptance_criteria"]
         run["summary"] = _summary(controls)
         run["log"].append(_log_entry(f"{ctrl['id']}: {status.upper()} (AI-assisted) — {rationale[:80]}"))
@@ -342,14 +383,17 @@ def _build_run(pin, gate, checklist_id, parent_run_id=None, reaudit_controls=Non
 
     controls = copy.deepcopy(cl["controls"])
     for c in controls:
-        c["status"]          = "pending"
-        c["checked_at"]      = ""
-        c["evidence_file"]   = None
-        c["evidence_src"]    = ""
-        c["rationale"]       = ""
-        c["finding_detail"]  = None
-        c["finding_excerpt"] = None
+        c["status"]           = "pending"
+        c["checked_at"]       = ""
+        c["evidence_file"]    = None
+        c["evidence_src"]     = ""
+        c["rationale"]        = ""
+        c["finding_detail"]   = None
+        c["finding_excerpt"]  = None
         c["evaluated_against"] = None
+        c["detailed_reason"]  = None
+        c["resolution_steps"] = None
+        c["resolution_url"]   = None
 
     if reaudit_controls and parent_run_id:
         parent = RUNS[parent_run_id]
@@ -358,7 +402,8 @@ def _build_run(pin, gate, checklist_id, parent_run_id=None, reaudit_controls=Non
                 pc = next((x for x in parent["controls"] if x["id"]==c["id"]), None)
                 if pc:
                     for k in ["status","checked_at","evidence_file","evidence_src",
-                              "rationale","finding_detail","finding_excerpt","evaluated_against"]:
+                              "rationale","finding_detail","finding_excerpt","evaluated_against",
+                              "detailed_reason","resolution_steps","resolution_url"]:
                         c[k] = pc.get(k)
                     c["carried_from"] = parent_run_id
 
@@ -676,6 +721,14 @@ def api_export(run_id):
         if c.get("waiver"):
             w=c["waiver"]
             lines.append(f"  Waiver              : {w['rationale']} | {w['approver']} | Expiry: {w['expiry']}")
+        if c.get("detailed_reason"):
+            lines.append(f"  Failure Detail      : {c['detailed_reason'][:200]}")
+        if c.get("resolution_url"):
+            lines.append(f"  Resolution URL      : {c['resolution_url']}")
+        if c.get("resolution_steps"):
+            lines.append(f"  Resolution Steps    :")
+            for i, step in enumerate(c["resolution_steps"], 1):
+                lines.append(f"    {i}. {step}")
     lines += ["","AUDIT LOG","-"*40] + [f"  {e}" for e in run["log"]]
     if run.get("gate_decision"):
         gd=run["gate_decision"]
@@ -688,6 +741,31 @@ def api_export(run_id):
     return "\n".join(lines), 200, {
         "Content-Type":"text/plain; charset=utf-8",
         "Content-Disposition":f"attachment; filename=GateReport_{run_id}.txt"}
+
+@app.route("/api/audit/<run_id>/resolution", methods=["POST"])
+def api_update_resolution(run_id):
+    """Reviewer sets or updates the resolution URL and detailed reason for any control."""
+    if run_id not in RUNS: return jsonify({"error":"Not found"}), 404
+    d = request.get_json(force=True)
+    cid            = d.get("control_id","").strip()
+    resolution_url = d.get("resolution_url","").strip()
+    detailed_reason= d.get("detailed_reason","").strip()
+    resolution_steps = d.get("resolution_steps", None)   # list[str] or None
+    if not cid: return jsonify({"error":"control_id required"}), 400
+    run  = RUNS[run_id]
+    ctrl = next((c for c in run["controls"] if c["id"]==cid), None)
+    if not ctrl: return jsonify({"error":"Control not found"}), 404
+    if resolution_url:   ctrl["resolution_url"]   = resolution_url
+    if detailed_reason:  ctrl["detailed_reason"]  = detailed_reason
+    if resolution_steps: ctrl["resolution_steps"] = resolution_steps
+    run["log"].append(_log_entry(
+        f"Resolution info updated for {cid} by reviewer."
+        + (f" URL: {resolution_url}" if resolution_url else "")
+    ))
+    return jsonify({"ok":True,"control_id":cid,
+                    "resolution_url":ctrl.get("resolution_url"),
+                    "detailed_reason":ctrl.get("detailed_reason"),
+                    "resolution_steps":ctrl.get("resolution_steps")})
 
 @app.route("/api/runs", methods=["GET"])
 def api_all_runs():

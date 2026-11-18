@@ -8,19 +8,18 @@
 </head>
 <body>
 
+<!-- Global topnav -->
+<nav class="topbar">
+  <div class="topbar-appsw"><svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="7" y="1" width="5" height="5" rx="1"/><rect x="13" y="1" width="4" height="5" rx="1"/><rect x="1" y="7" width="5" height="5" rx="1"/><rect x="7" y="7" width="5" height="5" rx="1"/><rect x="13" y="7" width="4" height="5" rx="1"/><rect x="1" y="13" width="5" height="4" rx="1"/><rect x="7" y="13" width="5" height="4" rx="1"/><rect x="13" y="13" width="4" height="4" rx="1"/></svg></div>
+  <a class="topbar-logo" href="/"><div class="topbar-logo-icon"><svg viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M12 2L4 5.5V11c0 4.97 3.4 9.63 8 10.93C16.6 20.63 20 15.97 20 11V5.5L12 2z"/></svg></div><span class="topbar-logo-name">AuditCore</span></a>
+  <div class="topbar-search"><span class="topbar-search-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5.5" cy="5.5" r="4"/><path d="M9 9l3 3"/></svg></span><input type="text" placeholder="Search AuditCore" readonly/></div>
+  <div class="topbar-right"><a href="/" class="btn-create"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6.75 1.25H5.25v4H1.25v1.5h4v4h1.5v-4h4v-1.5h-4v-4z"/></svg> Create</a><div class="topbar-avatar">QA</div></div>
+</nav>
+
 {% set active_page = 'reports' %}
 {% include '_nav.html' %}
 
 <div class="main-wrap">
-  <header class="topbar">
-    <div class="topbar-breadcrumb">
-      <a href="/">Dashboard</a><span class="sep">›</span>
-      <span class="current">Audit Results</span>
-    </div>
-    <div class="topbar-right">
-      <div class="topbar-pill phase1-pill"><span class="dot blue"></span> Phase 1 Pilot</div>
-    </div>
-  </header>
 
   <main class="page">
     <div class="page-header">
@@ -28,7 +27,7 @@
         <div class="page-title">Audit Results</div>
         <div class="page-subtitle">All audit runs — initial runs and re-audits. Click any run to open the full results screen.</div>
       </div>
-      <a href="/" class="btn btn-primary">▶ Start New Audit</a>
+      <a href="/" class="btn btn-primary btn-sm">▶ Start New Audit</a>
     </div>
 
     <!-- Summary row -->
