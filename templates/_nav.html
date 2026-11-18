@@ -1,45 +1,89 @@
-{# Shared sidebar — include with: {% set active_page = 'dashboard' %} {% include '_nav.html' %} #}
+{#
+  Jira-inspired sidebar — 2025 navigation
+  White background · 3px radius active indicator · blue tint on active
+  Include with:  {% set active_page = 'dashboard' %}  {% include '_nav.html' %}
+#}
 <aside class="sidebar">
+
+  <!-- Brand -->
   <div class="sidebar-brand">
     <div class="brand-icon">
-      <svg viewBox="0 0 24 24"><path d="M12 2L4 5.5V11c0 4.97 3.4 9.63 8 10.93C16.6 20.63 20 15.97 20 11V5.5L12 2z"/></svg>
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L4 5.5V11c0 4.97 3.4 9.63 8 10.93C16.6 20.63 20 15.97 20 11V5.5L12 2z"/>
+      </svg>
     </div>
-    <div><div class="brand-text">AuditCore<span>Comviva · Phase 1 Pilot</span></div></div>
+    <div>
+      <div class="brand-text">AuditCore <span>Comviva · Phase 1</span></div>
+    </div>
   </div>
 
+  <!-- Main nav -->
   <div class="sidebar-section-label">Main</div>
 
   <a class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" href="/">
-    <span class="nav-icon">🏠</span> Dashboard
+    <span class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+      </svg>
+    </span>
+    Dashboard
   </a>
 
   <a class="nav-item {% if active_page == 'setup' %}active{% endif %}" href="/setup">
-    <span class="nav-icon">📋</span> Checklist Setup
+    <span class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 7V3.5L18.5 9H13zm-5 4h8v2H8v-2zm0 4h5v2H8v-2z"/>
+      </svg>
+    </span>
+    Checklist Setup
   </a>
 
   <a class="nav-item {% if active_page == 'projects' %}active{% endif %}" href="/projects">
-    <span class="nav-icon">📁</span> Projects
+    <span class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 6h-2.18A3 3 0 0015 4H9a3 3 0 00-2.82 2H4a2 2 0 00-2 2v11a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2zm-11 1a1 1 0 112 0 1 1 0 01-2 0zm6 0h-2V6h2v1z"/>
+      </svg>
+    </span>
+    Projects
   </a>
 
+  <!-- Audit section -->
   <div class="sidebar-section-label">Audit</div>
 
   <a class="nav-item {% if active_page == 'reports' %}active{% endif %}" href="/reports">
-    <span class="nav-icon">🔍</span> Audit Results
+    <span class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/>
+      </svg>
+    </span>
+    Audit Results
     {% if run_count is defined and run_count > 0 %}
-    <span class="nav-badge">{{ run_count }}</span>
+      <span class="nav-badge">{{ run_count }}</span>
     {% endif %}
   </a>
 
   <a class="nav-item {% if active_page == 'connectors' %}active{% endif %}" href="/connectors">
-    <span class="nav-icon">🔌</span> Connectors
+    <span class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M6.5 10h-2v7h2v-7zm6 0h-2v7h2v-7zm8.5 9H2v2h19v-2zm-2.5-9h-2v7h2v-7zM11.5 1L2 6v2h19V6l-9.5-5z"/>
+      </svg>
+    </span>
+    Connectors
   </a>
 
+  <!-- Admin -->
   <div class="sidebar-section-label">Admin</div>
 
   <a class="nav-item {% if active_page == 'settings' %}active{% endif %}" href="/settings">
-    <span class="nav-icon">⚙️</span> Settings
+    <span class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.14 12.94A7.07 7.07 0 0019.2 12a7.07 7.07 0 00-.06-.94l2.03-1.58a.5.5 0 00.12-.63l-1.92-3.32a.5.5 0 00-.61-.22l-2.39.96a7 7 0 00-1.62-.94l-.36-2.54A.49.49 0 0014 3h-4a.49.49 0 00-.49.42l-.36 2.54a7 7 0 00-1.62.94l-2.39-.96a.48.48 0 00-.61.22L2.61 9.48a.49.49 0 00.12.63l2.03 1.58A7.07 7.07 0 004.7 12a7.07 7.07 0 00.06.94l-2.03 1.58a.5.5 0 00-.12.63l1.92 3.32c.12.22.37.3.61.22l2.39-.96c.5.36 1.05.67 1.62.94l.36 2.54c.07.24.28.42.49.42h4c.27 0 .49-.18.49-.42l.36-2.54a7 7 0 001.62-.94l2.39.96c.24.09.49 0 .61-.22l1.92-3.32a.49.49 0 00-.12-.63l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/>
+      </svg>
+    </span>
+    Settings
   </a>
 
+  <!-- User footer -->
   <div class="sidebar-footer">
     <div class="sidebar-avatar">QA</div>
     <div>
@@ -47,4 +91,5 @@
       <div class="sidebar-user-role">Comviva · Reviewer</div>
     </div>
   </div>
+
 </aside>

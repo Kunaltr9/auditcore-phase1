@@ -83,7 +83,7 @@ function renderTopbar(run) {
     pill.className = 'topbar-pill pill-review';
     txt.innerHTML  = '<span class="dot amber"></span> Awaiting Reviewer';
   } else {
-    pill.className = 'topbar-pill';
+    pill.className = 'topbar-pill default';
     txt.innerHTML  = '<span class="pulse"></span> Agents running…';
   }
 }

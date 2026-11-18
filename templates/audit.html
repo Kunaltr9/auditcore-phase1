@@ -24,7 +24,7 @@
       <span class="current">{{ run.gate }} Audit Results</span>
     </div>
     <div class="topbar-right">
-      <div id="topbar-pill" class="topbar-pill">
+      <div id="topbar-pill" class="topbar-pill default">
         <span class="pulse"></span> <span id="topbar-text">Agents running…</span>
       </div>
     </div>
@@ -49,30 +49,33 @@
       </div>
     </div>
 
-    <!-- Context Banner -->
+    <!-- Context Banner — Jira project header style -->
     <div class="context-banner">
       <div class="ctx-item"><label>Project</label><div class="ctx-value">{{ run.project_name }}</div></div>
       <div class="ctx-item"><label>PIN</label><div class="ctx-value mono">{{ run.pin }}</div></div>
-      <div class="ctx-item"><label>Project Type</label><div class="ctx-value">{{ run.project_type }} <span style="color:rgba(255,255,255,.4);font-size:11px;">· {{ run.lifecycle }}</span></div></div>
+      <div class="ctx-item"><label>Project Type</label><div class="ctx-value">{{ run.project_type }} <span style="color:var(--ds-text-subtlest);font-size:11px;">· {{ run.lifecycle }}</span></div></div>
       <div class="ctx-item"><label>Gate</label>
-        <div class="ctx-value"><span style="background:rgba(255,255,255,.15);color:#fff;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700;">{{ run.gate }}</span> RFP → Solution Proposal</div>
+        <div class="ctx-value" style="display:flex;align-items:center;gap:6px;">
+          <span class="gate-badge gate-active">{{ run.gate }}</span>
+          <span style="font-size:12px;color:var(--ds-text-subtle);">RFP → Solution Proposal</span>
+        </div>
       </div>
-      <div class="ctx-item"><label>Checklist Version</label><div class="ctx-value mono">{{ run.policy_version }} <span style="color:rgba(255,255,255,.4);font-size:11px;">({{ run.policy_approved }})</span></div></div>
+      <div class="ctx-item"><label>Checklist Version</label><div class="ctx-value mono">{{ run.policy_version }} <span style="color:var(--ds-text-subtlest);font-size:11px;">({{ run.policy_approved }})</span></div></div>
       <div class="ctx-item"><label>Gate Status</label><div class="ctx-value" id="ctx-gate-status"><span class="badge inprog"><span class="dot amber"></span> In Progress</span></div></div>
       <div class="ctx-item"><label>AI Model</label><div class="ctx-value small">{{ run.ai_model }}</div></div>
       <div class="ctx-item"><label>Run ID</label><div class="ctx-value mono small">{{ run.run_id }}</div></div>
     </div>
 
-    <!-- Summary cards -->
+    <!-- Summary metric cards — Jira font.metric style -->
     <div class="summary-row">
-      <div class="summary-card"><div class="s-icon s-total-bg">📊</div><div><div class="s-num s-total" id="sum-total">—</div><div class="s-label">Total Controls</div></div></div>
-      <div class="summary-card"><div class="s-icon s-pass-bg">✅</div><div><div class="s-num s-pass" id="sum-pass">—</div><div class="s-label">Pass</div></div></div>
-      <div class="summary-card"><div class="s-icon s-fail-bg">❌</div><div><div class="s-num s-fail" id="sum-fail">—</div><div class="s-label">Fail</div></div></div>
-      <div class="summary-card"><div class="s-icon s-review-bg">👁</div><div><div class="s-num s-review" id="sum-review">—</div><div class="s-label">Needs Review</div></div></div>
-      <div class="summary-card"><div class="s-icon s-unable-bg">⚠️</div><div><div class="s-num s-unable" id="sum-unable">—</div><div class="s-label">Unable to Verify</div></div></div>
-      <div class="summary-card"><div class="s-icon s-pending-bg">🕐</div><div><div class="s-num s-pending" id="sum-pending">—</div><div class="s-label">Pending</div></div></div>
-      <div class="summary-card"><div class="s-icon s-waived-bg">🔖</div><div><div class="s-num s-waived" id="sum-waived">—</div><div class="s-label">Waived</div></div></div>
-      <div class="summary-card" title="Excluded for this project type — not a failure"><div class="s-icon" style="background:#f3f4f6;">🚫</div><div><div class="s-num" style="color:#6b7280;" id="sum-na">0</div><div class="s-label">Not Applicable</div></div></div>
+      <div class="summary-card"><div class="s-label">Total Controls</div><div class="s-num s-total" id="sum-total">—</div></div>
+      <div class="summary-card"><div class="s-label">Pass</div><div class="s-num s-pass" id="sum-pass">—</div></div>
+      <div class="summary-card"><div class="s-label">Fail</div><div class="s-num s-fail" id="sum-fail">—</div></div>
+      <div class="summary-card"><div class="s-label">Needs Review</div><div class="s-num s-review" id="sum-review">—</div></div>
+      <div class="summary-card"><div class="s-label">Unable to Verify</div><div class="s-num s-unable" id="sum-unable">—</div></div>
+      <div class="summary-card"><div class="s-label">Pending</div><div class="s-num s-pending" id="sum-pending">—</div></div>
+      <div class="summary-card"><div class="s-label">Waived</div><div class="s-num s-waived" id="sum-waived">—</div></div>
+      <div class="summary-card" title="Excluded for this project type — not a failure"><div class="s-label">Not Applicable</div><div class="s-num" style="color:var(--ds-text-subtlest);" id="sum-na">0</div></div>
     </div>
 
     <!-- Policy notice -->
