@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════════════════════════════
+﻿/* ═══════════════════════════════════════════════════════════
    AuditCore · app.js
    Jira-faithful audit screen — polling, all renders, modals
 ═══════════════════════════════════════════════════════════ */
@@ -11,7 +11,7 @@ let _pollTimer  = null;
 let _startedAt  = null;
 
 const PIPELINE = [
-  { n:1, label:'Policy & Gate Resolved',           sub:'Comviva checklist pinned to run' },
+  { n:1, label:'Policy & Gate Resolved',           sub:'ABC checklist pinned to run' },
   { n:2, label:'Evidence Retrieved',               sub:'SharePoint · agents auto-collected' },
   { n:3, label:'Deterministic Checks',             sub:'Rules engine — no AI' },
   { n:4, label:'AI-Assisted Checks',               sub:'Scope / Traceability Agent' },

@@ -1,6 +1,6 @@
-"""
+﻿"""
 AI-Driven Audit & Compliance — Phase 1 Prototype
-3R Infotech · Comviva
+3R Infotech · ABC
 
 FLOW:
   1. Customer defines checklist controls + compliance policies → approves a version
@@ -31,15 +31,15 @@ RUNS         = {}   # run_id -> audit run
 # SEED PROJECTS
 # ─────────────────────────────────────────────────────────
 SEED_PROJECTS = [
-    {"pin":"PIN-2024-0047","name":"Comviva MobileMoney Platform Upgrade",
+    {"pin":"PIN-2024-0047","name":"ABC MobileMoney Platform Upgrade",
      "type":"New Implementation","lifecycle":"v1.2",
      "delivery_owner":"Rajesh Kumar","business_unit":"Digital Financial Services",
      "applicable_gates":["G1","G2","G3","G4","G5"]},
-    {"pin":"PIN-2024-0051","name":"Comviva CRM Integration — APAC",
+    {"pin":"PIN-2024-0051","name":"ABC CRM Integration — APAC",
      "type":"Enhancement","lifecycle":"v1.1",
      "delivery_owner":"Priya Sharma","business_unit":"Customer Platforms",
      "applicable_gates":["G2","G3","G4","G5"]},
-    {"pin":"PIN-2024-0063","name":"Comviva Analytics Modernisation",
+    {"pin":"PIN-2024-0063","name":"ABC Analytics Modernisation",
      "type":"Migration","lifecycle":"v1.2",
      "delivery_owner":"Amit Patel","business_unit":"Data & AI",
      "applicable_gates":["G1","G2","G3","G4","G5","G6"]},
@@ -62,7 +62,7 @@ DEFAULT_CONTROLS = [
      "acceptance_criteria":"Brief linked to PIN, modified within last 90 days",
      "severity":"mandatory","check_type":"deterministic","source_hint":"SharePoint"},
     {"id":"G1-C03","requirement":"Approved response template used",
-     "description":"Comviva-approved proposal template must be base document",
+     "description":"ABC-approved proposal template must be base document",
      "acceptance_criteria":"Template headers match TPL-G1-current, all sections present",
      "severity":"mandatory","check_type":"deterministic","source_hint":"SharePoint"},
     {"id":"G1-C04","requirement":"Capability matrix completed",
@@ -82,7 +82,7 @@ DEFAULT_CONTROLS = [
      "acceptance_criteria":"100% of requirements mapped, each with source clause and destination",
      "severity":"mandatory","check_type":"ai-assisted","source_hint":"SharePoint"},
     {"id":"G1-C08","requirement":"Draft proposal reviewed and approved",
-     "description":"Approval from authorised Comviva reviewer recorded in document system",
+     "description":"Approval from authorised ABC reviewer recorded in document system",
      "acceptance_criteria":"approval_status = Approved AND approver_id present",
      "severity":"mandatory","check_type":"deterministic","source_hint":"SharePoint"},
     {"id":"G1-C09","requirement":"Exceptions and deviations register",
@@ -97,7 +97,7 @@ DEFAULT_CONTROLS = [
      "description":"Assumptions rated HIGH impact must have owner and approval date",
      "acceptance_criteria":"Zero HIGH-impact assumptions without owner and approval date",
      "severity":"advisory","check_type":"ai-assisted","source_hint":"SharePoint"},
-    {"id":"G1-C12","requirement":"Project registered in Comviva project registry",
+    {"id":"G1-C12","requirement":"Project registered in ABC project registry",
      "description":"Project must exist in Dataverse project registry with matching PIN",
      "acceptance_criteria":"Dataverse record found, PIN match, status = Active",
      "severity":"mandatory","check_type":"deterministic","source_hint":"Dataverse"},
@@ -127,7 +127,7 @@ def _seed_checklist():
         "name": "G1 — RFP to Solution Proposal (Default)",
         "version": "v2.4.1",
         "approved": True,
-        "approved_by": "Comviva QA",
+        "approved_by": "ABC QA",
         "approved_at": "12 Oct 2026",
         "controls": copy.deepcopy(DEFAULT_CONTROLS),
         "policies": copy.deepcopy(DEFAULT_POLICIES),
@@ -142,8 +142,8 @@ def _seed_checklist():
 # Jira, Confluence, Dataverse etc.
 # ─────────────────────────────────────────────────────────
 CONNECTOR_EVIDENCE = {
-    "G1-C01": {"found":True,  "file":"Comviva_RFP_v3.pdf",          "src":"SharePoint · SP-4421 · v3",    "meta":"approval_status=Approved, version=3, modified=05 Oct 2026"},
-    "G1-C02": {"found":True,  "file":"ProjectBrief_Comviva.docx",    "src":"SharePoint · SP-4422 · v1",    "meta":"linked_pin=PIN-2024-0047, modified=05 Oct 2026"},
+    "G1-C01": {"found":True,  "file":"ABC_RFP_v3.pdf",          "src":"SharePoint · SP-4421 · v3",    "meta":"approval_status=Approved, version=3, modified=05 Oct 2026"},
+    "G1-C02": {"found":True,  "file":"ProjectBrief_ABC.docx",    "src":"SharePoint · SP-4422 · v1",    "meta":"linked_pin=PIN-2024-0047, modified=05 Oct 2026"},
     "G1-C03": {"found":True,  "file":"Proposal_Draft_v2.docx",       "src":"SharePoint · SP-4450 · v2",    "meta":"template_id=TPL-G1-2026, sections=all_present"},
     "G1-C04": {"found":True,  "file":"CapabilityMatrix_v1.xlsx",     "src":"SharePoint · SP-4451",          "meta":"rows=42, empty_mandatory=0"},
     "G1-C05": {"found":True,  "file":"Assumptions_Register.docx",    "src":"SharePoint · SP-4455",          "meta":"assumptions=14, unowned_high=3"},
@@ -173,7 +173,7 @@ def _evaluate_control(ctrl, evidence):
                 f"Acceptance criteria: {crit}\nConnector status: Phase 2 — not configured in pilot.",
                 "Connector: Dataverse\nStatus: Not configured (Phase 1 pilot)\nAction: Manual check required or re-run after Phase 2 connector enabled.",
                 "The Dataverse connector that verifies project registration is not active in the Phase 1 pilot scope. This control cannot be automatically evaluated until Phase 2 connectors are configured.\n\nThis result is marked Unable to Verify — it is NOT automatically a failure. A manual check can satisfy this control.",
-                ["Manually verify the project PIN exists in the Comviva Dataverse project registry",
+                ["Manually verify the project PIN exists in the ABC Dataverse project registry",
                  "Confirm the project status is set to Active",
                  "Record the manual verification result in the audit log",
                  "Or wait for Phase 2 deployment to enable the Dataverse connector"],
@@ -199,10 +199,10 @@ def _evaluate_control(ctrl, evidence):
                 "Approval metadata field is empty. No approver signature block detected. Acceptance criteria requires approval_status=Approved AND approver_id present.",
                 f"Acceptance criteria: {crit}\nEvidence metadata: {meta}",
                 'Expected: approval_status = "Approved"  AND  approver_id != null\nFound:    approval_status = "Draft"      AND  approver_id = null',
-                "The proposal document (SP-4450) is still in Draft status. The approval signature block in section 9.1 has not been completed. The document was last modified by T. Williams but no approval workflow has been triggered in the SharePoint document management system.\n\nThis is a mandatory control — the gate cannot proceed until an authorised Comviva reviewer formally approves the proposal in the document system.",
+                "The proposal document (SP-4450) is still in Draft status. The approval signature block in section 9.1 has not been completed. The document was last modified by T. Williams but no approval workflow has been triggered in the SharePoint document management system.\n\nThis is a mandatory control — the gate cannot proceed until an authorised ABC reviewer formally approves the proposal in the document system.",
                 ["Open Proposal_Draft_v2.docx in SharePoint (SP-4450)",
                  "Navigate to section 9.1 — Approval Sign-Off",
-                 "Request approval from an authorised Comviva Delivery Manager via the SharePoint approval workflow",
+                 "Request approval from an authorised ABC Delivery Manager via the SharePoint approval workflow",
                  "Confirm approval_status changes to 'Approved' and approver_id is populated",
                  "Return here and click 'Request Re-Audit' to re-run this control"],
                 "https://support.atlassian.com/jira-software-cloud/docs/approve-a-request/")
@@ -212,7 +212,7 @@ def _evaluate_control(ctrl, evidence):
                 "AI semantic check: section 4.2 Pricing Model detected but structured pricing table absent. AI confidence 61% — below the 80% threshold defined in acceptance criteria. Routed to human reviewer.",
                 f"Acceptance criteria: {crit}\nEvidence metadata: {meta}",
                 'Section 4.2 "Pricing Model": narrative text detected, structured table not found.\nRequired: unit pricing, volume tiers, payment schedule, currency.\nAI confidence: 61% (threshold: 80%)',
-                "The AI agent detected that section 4.2 Pricing Model contains narrative text but lacks the structured pricing table required by the Comviva checklist. The agent's confidence in the coverage assessment is 61%, which is below the 80% threshold required for an automatic pass.\n\nA human reviewer must examine section 4.2 and determine whether the content substantively satisfies the acceptance criteria.",
+                "The AI agent detected that section 4.2 Pricing Model contains narrative text but lacks the structured pricing table required by the ABC checklist. The agent's confidence in the coverage assessment is 61%, which is below the 80% threshold required for an automatic pass.\n\nA human reviewer must examine section 4.2 and determine whether the content substantively satisfies the acceptance criteria.",
                 ["Open the proposal document and navigate to section 4.2 — Pricing Model",
                  "Verify the section contains: unit pricing, volume tiers, payment schedule, and currency",
                  "If the structured table is absent, request the proposal author to add it",
@@ -225,10 +225,10 @@ def _evaluate_control(ctrl, evidence):
                 "3 of 14 HIGH-impact assumptions (A-07, A-11, A-13) have no owner or approval date. Acceptance criteria requires zero unowned HIGH-impact assumptions.",
                 f"Acceptance criteria: {crit}\nEvidence metadata: {meta}",
                 "A-07: Integration dependency on third-party API — owner: unassigned\nA-11: Go-live date fixed before UAT completion — owner: unassigned\nA-13: Regulatory approval assumed — owner: unassigned",
-                "The Assumptions Register (SP-4455) contains 14 assumptions. Three are classified as HIGH impact but have no assigned owner and no approval date recorded. Per Comviva policy, all HIGH-impact assumptions must be formally owned and approved before proceeding past G1.\n\nAffected assumptions: A-07 (third-party API dependency), A-11 (go-live before UAT), A-13 (regulatory approval assumed).",
+                "The Assumptions Register (SP-4455) contains 14 assumptions. Three are classified as HIGH impact but have no assigned owner and no approval date recorded. Per ABC policy, all HIGH-impact assumptions must be formally owned and approved before proceeding past G1.\n\nAffected assumptions: A-07 (third-party API dependency), A-11 (go-live before UAT), A-13 (regulatory approval assumed).",
                 ["Open Assumptions_Register.docx in SharePoint (SP-4455)",
                  "Locate assumptions A-07, A-11, and A-13",
-                 "Assign a named Comviva team member as owner for each",
+                 "Assign a named ABC team member as owner for each",
                  "Record an approval date or escalation decision for each HIGH-impact assumption",
                  "Re-upload the updated register and request a re-audit"],
                 None)
@@ -327,7 +327,7 @@ def _run_audit(run_id):
 
     # ── Step 5: Compliance Evaluator ────────────────────
     run["agents"]["evaluator"]["status"] = "running"
-    run["log"].append(_log_entry("Compliance Evaluator applying Comviva acceptance criteria to all findings."))
+    run["log"].append(_log_entry("Compliance Evaluator applying ABC acceptance criteria to all findings."))
     time.sleep(1.5)
 
     s = run["summary"]
@@ -691,7 +691,7 @@ def api_gate_decision(run_id):
 def api_export(run_id):
     if run_id not in RUNS: return jsonify({"error":"Not found"}), 404
     run = RUNS[run_id]; cl = CHECKLISTS.get(run["checklist_id"],{})
-    lines = ["="*70,"COMVIVA AUDIT GATE REPORT","="*70,
+    lines = ["="*70,"ABC AUDIT GATE REPORT","="*70,
              f"Run ID         : {run['run_id']}",
              f"Project        : {run['project_name']}",
              f"PIN            : {run['pin']}",
@@ -782,7 +782,7 @@ def api_projects():
 if __name__ == "__main__":
     print("="*60)
     print("  AI-Driven Audit & Compliance — Phase 1 Prototype")
-    print("  3R Infotech · Comviva")
+    print("  3R Infotech · ABC")
     print("  http://localhost:5000")
     print("="*60)
     app.run(debug=True, port=5000, use_reloader=False)
